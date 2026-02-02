@@ -1,6 +1,9 @@
 package com.wut.shortlink.admin.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.wut.shortlink.admin.common.convention.result.Result;
+import com.wut.shortlink.admin.common.convention.result.Results;
+import com.wut.shortlink.admin.dto.resp.UserActualRespDTO;
 import com.wut.shortlink.admin.dto.resp.UserRespDTO;
 import com.wut.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +23,12 @@ public class UserController {
     @RequestMapping("/api/short-link/admin/v1/user/{username}")
     public Result<UserRespDTO> getUserByUsername(@PathVariable("username") String username) {
         return userService.getUserByUsername(username);
+    }
+    /**
+     * 根据用户名查询用户无脱敏信息
+     */
+    @RequestMapping("/api/short-link/admin/v1/actual/user/{username}")
+    public Result<UserActualRespDTO> getActualUserByUsername(@PathVariable("username") String username) {
+        return Results.success(BeanUtil.toBean(userService.getUserByUsername(username).getData(), UserActualRespDTO.class));
     }
 }
