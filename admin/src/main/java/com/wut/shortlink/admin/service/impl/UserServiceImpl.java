@@ -1,6 +1,8 @@
 package com.wut.shortlink.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.admin.common.convention.exception.ClientException;
 import com.wut.shortlink.admin.common.convention.result.Result;
@@ -27,5 +29,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         UserRespDTO result = new UserRespDTO();
         BeanUtils.copyProperties(userDO, result);
         return Results.success(result);
+    }
+
+    @Override
+    public boolean hasUsername(String username) {
+        LambdaQueryWrapper<UserDO> wrapper = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, username);
+        UserDO userDO = baseMapper.selectOne(wrapper);
+        return userDO == null;
     }
 }
