@@ -51,7 +51,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void register(UserRegisterReqDTO userRegisterReqDTO) {
-        if (hasUsername(userRegisterReqDTO.getUsername())) {
+        if (!hasUsername(userRegisterReqDTO.getUsername())) {
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
         RLock lock = redissonClient.getLock(RedisCacheConstant.LOCK_USER_REGISTER_KEY+userRegisterReqDTO.getUsername());
