@@ -2,6 +2,8 @@ package com.wut.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.admin.common.constant.RedisCacheConstant;
 import com.wut.shortlink.admin.common.convention.exception.ClientException;
@@ -11,6 +13,7 @@ import com.wut.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.wut.shortlink.admin.dao.entity.UserDO;
 import com.wut.shortlink.admin.dao.mapper.UserMapper;
 import com.wut.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.wut.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.wut.shortlink.admin.dto.resp.UserRespDTO;
 import com.wut.shortlink.admin.service.UserService;
 import jakarta.annotation.Resource;
@@ -69,5 +72,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             lock.unlock();
         }
 
+    }
+
+    @Override
+    public void update(UserUpdateReqDTO userUpdateReqDTO) {
+        //todo 判断当前用户名是否是登录用户
+
+        LambdaUpdateWrapper<UserDO> lambdaUpdateWrapper = Wrappers.lambdaUpdate(UserDO.class)
+                .eq(UserDO::getUsername, userUpdateReqDTO.getUsername());
+        int updated = baseMapper.update(BeanUtil.toBean(userUpdateReqDTO, UserDO.class), lambdaUpdateWrapper);
+        if (updated < 1) {
+            throw new ClientException(UserErrorCodeEnum.USER_UPDATE_ERROR);
+        }
     }
 }

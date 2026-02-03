@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.wut.shortlink.admin.common.convention.result.Result;
 import com.wut.shortlink.admin.dao.entity.UserDO;
 import com.wut.shortlink.admin.dto.req.UserRegisterReqDTO;
+import com.wut.shortlink.admin.dto.req.UserUpdateReqDTO;
 import com.wut.shortlink.admin.dto.resp.UserRespDTO;
 
 /**
@@ -26,7 +27,12 @@ public interface UserService extends IService<UserDO> {
     /**
      * 添加用户
      * @param userRegisterReqDTO 用户注册信息
-     * @return 添加结果
      */
     void register(UserRegisterReqDTO userRegisterReqDTO);
+    /**
+     * 修改用户信息
+     * @param userUpdateReqDTO 用户信息
+     */
+
+    void update(UserUpdateReqDTO userUpdateReqDTO);
 }
