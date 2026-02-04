@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.admin.common.biz.user.UserContext;
+import com.wut.shortlink.admin.common.convention.exception.ClientException;
 import com.wut.shortlink.admin.dao.entity.GroupDO;
 import com.wut.shortlink.admin.dao.mapper.GroupMapper;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.wut.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.wut.shortlink.admin.dto.resp.ShortLinkGroupSaveRespDTO;
 import com.wut.shortlink.admin.service.GroupService;
 import com.wut.shortlink.admin.toolkit.RandomGenerator;
@@ -42,6 +44,18 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(wrapper);
         return BeanUtil.copyToList(groupDOList, ShortLinkGroupSaveRespDTO.class);
+    }
+
+    @Override
+    public void updateGroup(ShortLinkGroupUpdateReqDTO shortLinkGroupUpdateReqDTO) {
+        boolean updated = lambdaUpdate()
+                .eq(GroupDO::getGid, shortLinkGroupUpdateReqDTO.getGid())
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .set(GroupDO::getName, shortLinkGroupUpdateReqDTO.getName())
+                .update();
+        if (!updated) {
+            throw new ClientException("更新失败！");
+        }
     }
 
     private Boolean hasGid(String gid) {
