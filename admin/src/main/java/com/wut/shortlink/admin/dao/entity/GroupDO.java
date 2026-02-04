@@ -1,20 +1,21 @@
 package com.wut.shortlink.admin.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.wut.shortlink.admin.common.database.BaseDO;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @TableName("t_group")
 /**
  * 短链接分组实体
  */
-public class GroupDO {
+public class GroupDO extends BaseDO {
     /**
      * ID
      */
@@ -39,18 +40,5 @@ public class GroupDO {
 //     * 分组排序
 //     */
 //    private Integer sortOrder;
-    /**
-     * 创建时间
-     */
-    private Date createTime;
 
-    /**
-     * 修改时间
-     */
-    private Date updateTime;
-
-    /**
-     * 删除标识 0：未删除 1：已删除
-     */
-    private Integer delFlag;
 }
