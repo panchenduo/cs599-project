@@ -51,13 +51,22 @@ public interface UserService extends IService<UserDO> {
      */
 
     UserLoginRespDTO login(UserLoginReqDTO userLoginReqDTO);
+
     /**
      * 检查用户登录状态
      *
      * @param username 用户名
-     * @param token Token
+     * @param token    Token
      * @return True: 用户已经登录 False: 用户没有登录
      */
 
     Boolean checkLogin(String username, String token);
+
+    /**
+     * 用户登出
+     *
+     * @param username 用户名
+     * @param token    Token
+     */
+    void logout(String username, String token);
 }

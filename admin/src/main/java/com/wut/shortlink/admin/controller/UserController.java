@@ -47,16 +47,15 @@ public class UserController {
 
     /**
      * 添加用户
-     *
      */
     @PostMapping("/api/short-link/admin/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO userRegisterReqDTO) {
         userService.register(userRegisterReqDTO);
         return Results.success();
     }
+
     /**
      * 修改用户信息
-     *
      */
     @PutMapping("/api/short-link/admin/v1/user")
     public Result<Void> update(@RequestBody UserUpdateReqDTO userUpdateReqDTO) {
@@ -66,18 +65,30 @@ public class UserController {
 
     /**
      * 用户登录
+     *
      * @return Token
      */
     @PostMapping("/api/short-link/admin/v1/user/login")
     public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO userLoginReqDTO) {
         return Results.success(userService.login(userLoginReqDTO));
     }
+
     /**
      * 检查用户登录状态
+     *
      * @return True: 用户已经登录 False: 用户没有登录
      */
     @GetMapping("/api/short-link/admin/v1/user/check-login")
     public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
         return Results.success(userService.checkLogin(username, token));
+    }
+
+    /**
+     * 用户退出登录
+     */
+    @DeleteMapping("/api/short-link/admin/v1/user/logout")
+    public Result<Void> logout(@RequestParam("username") String username, @RequestParam("token") String token) {
+        userService.logout(username, token);
+        return Results.success();
     }
 }
