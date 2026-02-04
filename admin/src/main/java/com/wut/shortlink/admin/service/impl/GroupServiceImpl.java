@@ -9,6 +9,7 @@ import com.wut.shortlink.admin.common.convention.exception.ClientException;
 import com.wut.shortlink.admin.dao.entity.GroupDO;
 import com.wut.shortlink.admin.dao.mapper.GroupMapper;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.wut.shortlink.admin.dto.req.ShortLinkGroupSortDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.wut.shortlink.admin.dto.resp.ShortLinkGroupSaveRespDTO;
 import com.wut.shortlink.admin.service.GroupService;
@@ -68,6 +69,21 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         if (!deleted) {
             throw new ClientException("删除失败！");
         }
+    }
+
+    @Override
+    public void sortGroup(List<ShortLinkGroupSortDTO> shortLinkGroupSortDTO) {
+        shortLinkGroupSortDTO.forEach(item -> {
+            boolean updated = lambdaUpdate()
+                    .eq(GroupDO::getGid, item.getGid())
+                    .eq(GroupDO::getUsername, UserContext.getUsername())
+                    .eq(GroupDO::getDelFlag, 0)
+                    .set(GroupDO::getSortOrder, item.getSortOrder())
+                    .update();
+            if (!updated) {
+                throw new ClientException("排序失败！");
+            }
+        });
     }
 
     private Boolean hasGid(String gid) {

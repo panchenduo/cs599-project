@@ -3,6 +3,7 @@ package com.wut.shortlink.admin.controller;
 import com.wut.shortlink.admin.common.convention.result.Result;
 import com.wut.shortlink.admin.common.convention.result.Results;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.wut.shortlink.admin.dto.req.ShortLinkGroupSortDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.wut.shortlink.admin.dto.resp.ShortLinkGroupSaveRespDTO;
 import com.wut.shortlink.admin.service.GroupService;
@@ -47,6 +48,14 @@ public class GroupController {
     @DeleteMapping("/api/short-link/admin/v1/group")
     public Result<Void> deleteGroup(@RequestParam("gid") String gid) {
         groupService.deleteGroup(gid);
+        return Results.success();
+    }
+    /**
+     * 排序短链接分组
+     */
+    @PostMapping("/api/short-link/admin/v1/group/sort")
+    public Result<Void> sortGroup(@RequestBody List<ShortLinkGroupSortDTO> shortLinkGroupSortDTO) {
+        groupService.sortGroup(shortLinkGroupSortDTO);
         return Results.success();
     }
 }
