@@ -58,6 +58,18 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         }
     }
 
+    @Override
+    public void deleteGroup(String gid) {
+        boolean deleted = lambdaUpdate()
+                .eq(GroupDO::getGid, gid)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .set(GroupDO::getDelFlag, "1")
+                .update();
+        if (!deleted) {
+            throw new ClientException("删除失败！");
+        }
+    }
+
     private Boolean hasGid(String gid) {
         LambdaQueryWrapper<GroupDO> wrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getGid, gid)
