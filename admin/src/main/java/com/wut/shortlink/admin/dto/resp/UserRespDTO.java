@@ -2,9 +2,13 @@ package com.wut.shortlink.admin.dto.resp;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wut.shortlink.admin.common.serialize.PhoneDesensitizationSerializer;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserRespDTO {
 
     /**
