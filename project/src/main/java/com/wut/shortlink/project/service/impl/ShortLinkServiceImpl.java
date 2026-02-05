@@ -34,7 +34,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
         linkDO.setEnableStatus(0);
         try {
             baseMapper.insert(linkDO);
-            shortUriCreateCachePenetrationBloomFilter.add(shortLinkSuffix);
         } catch (DuplicateKeyException e) {
             //为什么通过布隆过滤器之后，在数据库还能遇到冲突？
             //高并发场景下，多个请求同时通过布隆过滤器，导致重复数据库添加重复信息。
@@ -42,6 +41,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
             //已经误判的短链接该如何处理
             throw new ServiceException("短链接已存在");
         }
+        shortUriCreateCachePenetrationBloomFilter.add(shortLinkSuffix);
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl(linkDO.getFullShortUrl())
                 .originUrl(linkDO.getOriginUrl())
