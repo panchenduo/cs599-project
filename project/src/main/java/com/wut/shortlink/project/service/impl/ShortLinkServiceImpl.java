@@ -1,6 +1,7 @@
 package com.wut.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.project.common.convention.exception.ServiceException;
 import com.wut.shortlink.project.dao.entity.LinkDO;
@@ -56,7 +57,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
                 throw new RuntimeException("短链接频繁生成，请稍后再试");
             }
             String originUrl = reqDTO.getOriginUrl();
-            originUrl += System.currentTimeMillis();
+            originUrl += UUID.randomUUID().toString();
             shortLinkSuffix = HashUtil.hashToBase62(originUrl);
             boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(reqDTO.getDomain() + "/" + shortLinkSuffix);
             if (!contains) {
