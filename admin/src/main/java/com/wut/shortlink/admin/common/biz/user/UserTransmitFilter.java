@@ -75,12 +75,13 @@ public class UserTransmitFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String requestURI = ((HttpServletRequest) servletRequest).getRequestURI();
-        if (!IGNOREURLS.contains(requestURI)) { //不是登录的话进行拦截
+        if (!IGNOREURLS.contains(requestURI)) {
+            //不是登录的话进行拦截
             String method = httpServletRequest.getMethod();
             if (!requestURI.equals("/api/short-link/admin/v1/user") && method.equals("POST")) {
                 String username = httpServletRequest.getHeader("username");
                 String token = httpServletRequest.getHeader("token");
-                if (!StrUtil.isAllBlank(username, token)) {
+                if (StrUtil.isAllBlank(username, token)) {
 //                    throw new ClientException(USER_NOT_AUTHORIZED);
                     returnJson(servletResponse, JSON.toJSONString(USER_NOT_AUTHORIZED));
                     return;
