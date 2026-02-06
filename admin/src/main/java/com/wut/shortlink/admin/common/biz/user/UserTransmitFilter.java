@@ -78,7 +78,7 @@ public class UserTransmitFilter implements Filter {
         if (!IGNOREURLS.contains(requestURI)) {
             //不是登录的话进行拦截
             String method = httpServletRequest.getMethod();
-            if (!requestURI.equals("/api/short-link/admin/v1/user") && method.equals("POST")) {
+            if (!(requestURI.equals("/api/short-link/admin/v1/user") && method.equals("POST"))) {
                 String username = httpServletRequest.getHeader("username");
                 String token = httpServletRequest.getHeader("token");
                 if (StrUtil.isAllBlank(username, token)) {
