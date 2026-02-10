@@ -6,7 +6,10 @@ import com.wut.shortlink.project.dao.entity.LinkDO;
 import com.wut.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import com.wut.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+
+import java.util.List;
 
 /**
  * 短链接服务接口层
@@ -15,4 +18,6 @@ public interface ShortLinkService extends IService<LinkDO> {
     ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO reqDTO);
 
     IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO shortLinkPageReqDTO);
+
+    List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam);
 }

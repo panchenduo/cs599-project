@@ -2,10 +2,9 @@ package com.wut.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wut.shortlink.admin.dao.entity.GroupDO;
-import com.wut.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSortDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
-import com.wut.shortlink.admin.dto.resp.ShortLinkGroupSaveRespDTO;
+import com.wut.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 
 import java.util.List;
 
@@ -14,14 +13,19 @@ import java.util.List;
  */
 public interface GroupService extends IService<GroupDO> {
     /**
-     * 新增短链接分组
+     * 新增短链接分组1
      */
-    void saveGroup(ShortLinkGroupSaveReqDTO shortLinkGroupSaveReqDTO);
+    void saveGroup(String groupName);
+
+    /**
+     * 新增短链接分组2
+     */
+    void saveGroup(String username,String groupName);
 
     /**
      * 获取分组列表
      */
-    List<ShortLinkGroupSaveRespDTO> groupList();
+    List<ShortLinkGroupRespDTO> groupList();
 
     /**
      * 修改短链接分组

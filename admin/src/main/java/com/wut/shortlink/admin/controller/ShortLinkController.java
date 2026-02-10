@@ -2,7 +2,7 @@ package com.wut.shortlink.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wut.shortlink.admin.common.convention.result.Result;
-import com.wut.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.wut.shortlink.admin.remote.ShortLinkRemoteService;
 import com.wut.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.wut.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;

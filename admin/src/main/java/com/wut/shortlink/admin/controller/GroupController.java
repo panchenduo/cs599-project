@@ -5,7 +5,7 @@ import com.wut.shortlink.admin.common.convention.result.Results;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSortDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
-import com.wut.shortlink.admin.dto.resp.ShortLinkGroupSaveRespDTO;
+import com.wut.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.wut.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,14 +24,14 @@ public class GroupController {
      */
     @PostMapping("/api/short-link/admin/v1/group")
     public Result<Void> saveGroup(@RequestBody ShortLinkGroupSaveReqDTO shortLinkGroupSaveReqDTO) {
-        groupService.saveGroup(shortLinkGroupSaveReqDTO);
+        groupService.saveGroup(shortLinkGroupSaveReqDTO.getName());
         return Results.success();
     }
     /**
      * 获取短链接分组列表
      */
     @GetMapping("/api/short-link/admin/v1/group")
-    public Result<List<ShortLinkGroupSaveRespDTO>> groupList() {
+    public Result<List<ShortLinkGroupRespDTO>> groupList() {
         return Results.success(groupService.groupList());
     }
     /**

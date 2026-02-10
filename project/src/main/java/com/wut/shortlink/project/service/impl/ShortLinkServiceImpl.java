@@ -3,6 +3,7 @@ package com.wut.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,6 +13,7 @@ import com.wut.shortlink.project.dao.mapper.ShortLinkMapper;
 import com.wut.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import com.wut.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.wut.shortlink.project.service.ShortLinkService;
 import com.wut.shortlink.project.toolkit.HashUtil;
@@ -20,6 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 短链接服务接口实现层
@@ -65,6 +70,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
         return pageResult.convert(item -> BeanUtil.copyProperties(item, ShortLinkPageRespDTO.class));
     }
 
+    @Override
+    public List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam) {
+        QueryWrapper<LinkDO> queryWrapper = Wrappers.query(new LinkDO())
+                .select("gid as gid, count(*) as shortLinkCount")
+                .in("gid", requestParam)
+                .eq("enable_status", 0)
+                .eq("del_flag", 0)
+                .eq("del_time", 0L)
+                .groupBy("gid");
+        List<Map<String, Object>> shortLinkDOList = baseMapper.selectMaps(queryWrapper);
+        return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
+    }
     private String generateSuffix(ShortLinkCreateReqDTO reqDTO) {
         String shortLinkSuffix;
         int customGenerateCount = 0;
