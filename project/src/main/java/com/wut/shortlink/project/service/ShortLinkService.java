@@ -9,6 +9,8 @@ import com.wut.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import java.util.List;
 
@@ -46,4 +48,6 @@ public interface ShortLinkService extends IService<LinkDO> {
      * @param requestParam 修改短链接请求参数
      */
     void updateShortLink(ShortLinkUpdateReqDTO requestParam);
+
+    void restoreUrl(String shortUri, ServletRequest request, ServletResponse response);
 }
