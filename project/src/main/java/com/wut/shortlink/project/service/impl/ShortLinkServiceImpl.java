@@ -24,6 +24,7 @@ import com.wut.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.wut.shortlink.project.service.ShortLinkService;
 import com.wut.shortlink.project.toolkit.HashUtil;
+import com.wut.shortlink.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -79,6 +80,12 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
             //已经误判的短链接该如何处理
             throw new ServiceException("短链接已存在");
         }
+        //缓存预热
+        stringRedisTemplate.opsForValue().set(
+                fullShortLink,
+                reqDTO.getOriginUrl(),
+                LinkUtil.getLinkCacheValidTime(reqDTO.getValidDate()), TimeUnit.MILLISECONDS
+        );
         shortUriCreateCachePenetrationBloomFilter.add(shortLinkSuffix);
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl("http://" + linkDO.getFullShortUrl())
