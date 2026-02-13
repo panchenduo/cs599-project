@@ -11,6 +11,7 @@ import com.wut.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import com.wut.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import com.wut.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,10 +42,11 @@ public interface ShortLinkRemoteService {
         return JSON.parseObject(s, new TypeReference<>() {
         });
     }
-    default Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(List<String> requestParam){
+
+    default Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(List<String> requestParam) {
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("requestParam", requestParam);
-        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/count",requestMap);
+        String s = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/count", requestMap);
         return JSON.parseObject(s, new TypeReference<>() {
         });
     }
@@ -56,5 +58,17 @@ public interface ShortLinkRemoteService {
      */
     default void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
         HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update", JSON.toJSONString(requestParam));
+    }
+
+    /**
+     * 根据 URL 获取标题
+     *
+     * @param url 目标网站地址
+     * @return 网站标题
+     */
+    default Result<String> getTitleByUrl(@RequestParam("url") String url) {
+        String resultStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url=" + url);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
+        });
     }
 }
