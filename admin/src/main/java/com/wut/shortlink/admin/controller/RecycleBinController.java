@@ -3,6 +3,7 @@ package com.wut.shortlink.admin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wut.shortlink.admin.common.convention.result.Result;
 import com.wut.shortlink.admin.common.convention.result.Results;
+import com.wut.shortlink.admin.dto.req.RecycleBinRecoverReqDTO;
 import com.wut.shortlink.admin.dto.req.RecycleBinSaveReqDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.wut.shortlink.admin.remote.ShortLinkRemoteService;
@@ -44,5 +45,13 @@ public class RecycleBinController {
     @GetMapping("/api/short-link/admin/v1/recycle-bin/page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
         return recycleBinService.pageRecycleBinShortLink(requestParam);
+    }
+    /**
+     * 恢复短链接
+     */
+    @PostMapping("/api/short-link/admin/v1/recycle-bin/recover")
+    public Result<Void> recoverRecycleBin(@RequestBody RecycleBinRecoverReqDTO requestParam) {
+        shortLinkRemoteService.recoverRecycleBin(requestParam);
+        return Results.success();
     }
 }

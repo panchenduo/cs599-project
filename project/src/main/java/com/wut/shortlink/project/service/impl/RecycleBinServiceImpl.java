@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.project.dao.entity.LinkDO;
 import com.wut.shortlink.project.dao.mapper.ShortLinkMapper;
+import com.wut.shortlink.project.dto.req.RecycleBinRecoverReqDTO;
 import com.wut.shortlink.project.dto.req.RecycleBinSaveReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import static com.wut.shortlink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static com.wut.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
 
 
@@ -55,5 +57,19 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> 
             result.setDomain("http://" + result.getDomain());
             return result;
         });
+    }
+
+    @Override
+    public void recoverRecycleBin(RecycleBinRecoverReqDTO requestParam) {
+        LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+                .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(LinkDO::getGid, requestParam.getGid())
+                .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getDelFlag, 0);
+        LinkDO shortLinkDO = LinkDO.builder()
+                .enableStatus(0)
+                .build();
+        baseMapper.update(shortLinkDO, updateWrapper);
+        stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
     }
 }
