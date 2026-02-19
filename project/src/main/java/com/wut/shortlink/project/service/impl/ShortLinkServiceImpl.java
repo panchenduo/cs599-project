@@ -18,14 +18,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.project.common.convention.exception.ClientException;
 import com.wut.shortlink.project.common.convention.exception.ServiceException;
 import com.wut.shortlink.project.common.enums.ValiDateTypeEnum;
-import com.wut.shortlink.project.dao.entity.LinkAccessStatsDO;
-import com.wut.shortlink.project.dao.entity.LinkDO;
-import com.wut.shortlink.project.dao.entity.LinkLocaleStatsDO;
-import com.wut.shortlink.project.dao.entity.ShortLinkGotoDO;
-import com.wut.shortlink.project.dao.mapper.LinkAccessStatsMapper;
-import com.wut.shortlink.project.dao.mapper.LinkLocaleStatsMapper;
-import com.wut.shortlink.project.dao.mapper.ShortLinkGotoMapper;
-import com.wut.shortlink.project.dao.mapper.ShortLinkMapper;
+import com.wut.shortlink.project.dao.entity.*;
+import com.wut.shortlink.project.dao.mapper.*;
 import com.wut.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -77,6 +71,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
     private final RedissonClient redissonClient;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
+    private final LinkOsStatsMapper linkOsStatsMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
@@ -304,6 +299,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
                     .date(new Date())
                     .build();
             linkAccessStatsMapper.shortLinkStats(linkAccessStatsDO);
+            //地域统计
             Map<String, Object> localeParamMap = new HashMap<>();
             localeParamMap.put("key", statsLocaleAmapKey);
             localeParamMap.put("ip", remoteAddr);
@@ -324,6 +320,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
                         .date(new Date())
                         .build();
                 linkLocaleStatsMapper.shortLinkLocaleState(linkLocaleStatsDO);
+                //os统计
+                LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
+                        .os(LinkUtil.getOs((HttpServletRequest) request))
+                        .cnt(1)
+                        .gid(gid)
+                        .fullShortUrl(fullShortUrl)
+                        .date(new Date())
+                        .build();
+                linkOsStatsMapper.shortLinkOsState(linkOsStatsDO);
             }
         } catch (Throwable ex) {
             log.error("短链接访问量统计异常", ex);
