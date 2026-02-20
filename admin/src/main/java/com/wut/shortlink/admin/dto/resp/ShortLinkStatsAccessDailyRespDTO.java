@@ -1,4 +1,4 @@
-package com.wut.shortlink.project.dto.resp;
+package com.wut.shortlink.admin.dto.resp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
