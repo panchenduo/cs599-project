@@ -5,8 +5,12 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * 短链接分页返回参数
+ */
 @Data
 public class ShortLinkPageRespDTO {
+
     /**
      * id
      */
@@ -32,22 +36,22 @@ public class ShortLinkPageRespDTO {
      */
     private String originUrl;
 
-
     /**
      * 分组标识
      */
     private String gid;
 
     /**
-     * 有效期类型 0：永久有效 1：用户自定义
+     * 有效期类型 0：永久有效 1：自定义
      */
-    private int validDateType;
+    private Integer validDateType;
 
     /**
      * 有效期
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date validDate;
+
     /**
      * 创建时间
      */
@@ -73,7 +77,7 @@ public class ShortLinkPageRespDTO {
     /**
      * 今日PV
      */
-    private Integer toDayPv;
+    private Integer todayPv;
 
     /**
      * 历史UV
@@ -83,15 +87,15 @@ public class ShortLinkPageRespDTO {
     /**
      * 今日UV
      */
-    private Integer toDayUv;
+    private Integer todayUv;
 
     /**
      * 历史UIP
      */
-    private Integer totalUIp;
+    private Integer totalUip;
 
     /**
      * 今日UIP
      */
-    private Integer toDayUIp;
+    private Integer todayUip;
 }
