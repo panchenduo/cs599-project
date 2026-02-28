@@ -3,9 +3,11 @@ package com.wut.shortlink.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wut.shortlink.project.common.convention.result.Result;
 import com.wut.shortlink.project.common.convention.result.Results;
+import com.wut.shortlink.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import com.wut.shortlink.project.dto.resp.ShortLinkBatchCreateRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -57,4 +59,13 @@ public class ShortLinkController {
     public void restoreUrl(@PathVariable("short-uri") String shortUri, ServletRequest request, ServletResponse response) {
         shortLinkService.restoreUrl(shortUri, request, response);
     }
+
+    /**
+     * 批量创建短链接
+     */
+    @PostMapping("/api/short-link/v1/create/batch")
+    public Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDTO requestParam) {
+        return Results.success(shortLinkService.batchCreateShortLink(requestParam));
+    }
+
 }
