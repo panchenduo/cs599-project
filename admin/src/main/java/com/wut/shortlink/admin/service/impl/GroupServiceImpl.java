@@ -11,7 +11,7 @@ import com.wut.shortlink.admin.dao.entity.GroupDO;
 import com.wut.shortlink.admin.dao.mapper.GroupMapper;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupSortDTO;
 import com.wut.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
-import com.wut.shortlink.admin.dto.resp.ShortLinkGroupCountQueryRespDTO;
+import com.wut.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wut.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.wut.shortlink.admin.remote.ShortLinkRemoteService;
 import com.wut.shortlink.admin.service.GroupService;

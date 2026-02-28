@@ -6,7 +6,7 @@ import com.wut.shortlink.admin.common.convention.result.Results;
 import com.wut.shortlink.admin.dto.req.RecycleBinRecoverReqDTO;
 import com.wut.shortlink.admin.dto.req.RecycleBinRemoveReqDTO;
 import com.wut.shortlink.admin.dto.req.RecycleBinSaveReqDTO;
-import com.wut.shortlink.admin.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.wut.shortlink.admin.remote.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.wut.shortlink.admin.remote.ShortLinkRemoteService;
 import com.wut.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import com.wut.shortlink.admin.service.RecycleBinService;

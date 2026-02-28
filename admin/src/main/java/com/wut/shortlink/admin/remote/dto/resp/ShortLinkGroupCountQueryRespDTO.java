@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.wut.shortlink.admin.dto.resp;
+package com.wut.shortlink.admin.remote.dto.resp;
 
 import lombok.Data;
 

@@ -9,7 +9,7 @@ import com.wut.shortlink.admin.common.convention.exception.ServiceException;
 import com.wut.shortlink.admin.common.convention.result.Result;
 import com.wut.shortlink.admin.dao.entity.GroupDO;
 import com.wut.shortlink.admin.dao.mapper.GroupMapper;
-import com.wut.shortlink.admin.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.wut.shortlink.admin.remote.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.wut.shortlink.admin.remote.ShortLinkRemoteService;
 import com.wut.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 import com.wut.shortlink.admin.service.RecycleBinService;

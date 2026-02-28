@@ -1,4 +1,4 @@
-package com.wut.shortlink.admin.dto.resp;
+package com.wut.shortlink.admin.remote.dto.resp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,13 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 短链接访问网络监控响应参数
+ * 短链接操作系统监控响应参数
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShortLinkStatsNetworkRespDTO {
+public class ShortLinkStatsOsRespDTO {
 
     /**
      * 统计
@@ -20,9 +20,9 @@ public class ShortLinkStatsNetworkRespDTO {
     private Integer cnt;
 
     /**
-     * 访问网络
+     * 操作系统
      */
-    private String network;
+    private String os;
 
     /**
      * 占比

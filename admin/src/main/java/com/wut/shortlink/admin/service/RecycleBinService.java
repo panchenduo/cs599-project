@@ -2,7 +2,7 @@ package com.wut.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wut.shortlink.admin.common.convention.result.Result;
-import com.wut.shortlink.admin.dto.req.ShortLinkRecycleBinPageReqDTO;
+import com.wut.shortlink.admin.remote.dto.req.ShortLinkRecycleBinPageReqDTO;
 import com.wut.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 
 /**
