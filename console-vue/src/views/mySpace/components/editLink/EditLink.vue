@@ -84,7 +84,7 @@ const formData = reactive({
   domain: defaultDomain,
   originUrl: editData.originUrl,
   gid: editData.gid,
-  originalGid: editData.gid,
+  originGid: editData.gid,
   createdType: editData.createdType,
   validDate: editData.validDate,
   describe: editData.describe,
@@ -195,9 +195,9 @@ const formRule = reactive({
       trigger: 'blur'
     },
   ],
-  gid: [{required: true, message: '请选择分组', trigger: 'blur'}],
+  gid: [{ required: true, message: '请选择分组', trigger: 'blur' }],
   describe: [
-    {required: true, message: '请输入描述信息', trigger: 'blur'},
+    { required: true, message: '请输入描述信息', trigger: 'blur' },
     {
       validator: function (rule, value, callback) {
         // console.log('============', value, value.split('/n'))
@@ -211,7 +211,7 @@ const formRule = reactive({
     },
   ],
   validDate: [
-    {required: false, message: '请输日期', trigger: 'blur'},
+    { required: false, message: '请输日期', trigger: 'blur' },
     // {
     //   validator: function (rule, value, callback) {
     //     if (describeRows.value > maxDescribeRows.value) {
