@@ -256,7 +256,7 @@
 </template>
 
 <script setup>
-import { ref, watch, reactive } from 'vue'
+import {ref, watch, reactive} from 'vue'
 import TitleContent from './TitleContent.vue'
 import * as echarts from 'echarts'
 import 'echarts/map/js/china.js'
@@ -281,7 +281,9 @@ import PC from '@/assets/png/电脑.png'
 import Mobile from '@/assets/png/移动设备.png'
 import MobileDevices from '@/assets/png/移动设备.png'
 import defaultImg from '@/assets/png/短链默认图标.png'
-import { getTodayFormatDate, getLastWeekFormatDate } from '@/utils/plugins.js'
+import opera from '@/assets/png/opera.png'
+import IE from '@/assets/png/IE.png'
+import {getTodayFormatDate, getLastWeekFormatDate} from '@/utils/plugins.js'
 
 // 选择时间
 const shortcuts = [
@@ -338,10 +340,14 @@ const getUrl1 = (img) => {
     return Chorme
   } else if (img?.includes('fire')) {
     return firefox
-  } else if (img?.includes('safair')) {
+  } else if (img?.includes('safari')) {
     return Safair
   } else if (img?.includes('wechat') || img?.includes('微信')) {
     return WeChat
+  } else if (img?.includes('opera')) {
+    return opera
+  } else if (img?.includes('internet')) {
+    return IE
   } else {
     return other
   }
@@ -486,10 +492,10 @@ watch(
     () => {
       chinaTotalNum.value = 0
       chinaMapData.value = props.info?.localeCnStats.map((item) => {
-        let { cnt, locale, ratio } = item
+        let {cnt, locale, ratio} = item
         locale = locale.replace('省', '')
         chinaTotalNum.value += cnt
-        return { name: locale, value: cnt, ratio }
+        return {name: locale, value: cnt, ratio}
       })
       console.log(chinaMapData)
       initChinaMap()
@@ -890,7 +896,7 @@ watch(
       visitsData.value = props?.info?.daily
       // 获取总数量和数据集数组
       visitsData?.value?.forEach((item) => {
-        const { pv, uv, uip, date } = item
+        const {pv, uv, uip, date} = item
         const formDate = date.split('-')[1] + '月' + date.split('-')[2] + '日'
         totalPv.value += pv
         totalUv.value += uv
@@ -997,11 +1003,13 @@ watch(
   .top10 {
     padding: 15px 30px;
     width: 400px;
+
     .top-item {
       display: flex;
       flex-direction: column;
       flex-wrap: wrap;
       height: 200px;
+
       div {
         height: 40px;
         display: flex;
@@ -1029,10 +1037,12 @@ watch(
   width: 600px;
   height: 200px;
 }
+
 .flex-box {
   display: flex;
   justify-content: space-around;
 }
+
 .pagination-block {
   .el-pagination {
     margin-left: 20%;
