@@ -5,16 +5,34 @@
         <div class="header">
           <div @click="toMySpace" class="logo">拿个offer-SaaS短链接</div>
           <div style="display: flex; align-items: center">
-            <a class="link-span" style="text-decoration:none;" target="_blank" href="https://nageoffer.com/shortlink/">文档</a>
-            <a class="link-span" style="text-decoration:none;" target="_blank" href="https://nageoffer.com/shortlink/">博客</a>
-            <a class="link-span" style="text-decoration:none;" target="_blank" href="https://nageoffer.com/shortlink/">社区</a>
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://nageoffer.com/shortlink/"
+            >文档</a
+            >
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://nageoffer.com/shortlink/"
+            >博客</a
+            >
+            <a
+                class="link-span"
+                style="text-decoration: none"
+                target="_blank"
+                href="https://nageoffer.com/shortlink/"
+            >社区</a
+            >
             <el-dropdown>
               <div class="block">
                 <el-avatar
-                  :size="30"
-                  class="avatar"
-                  :style="`background:${extractColorByName(firstName)}`"
-                  >{{ firstName }}
+                    :size="30"
+                    class="avatar"
+                    :style="`background:${extractColorByName(firstName)}`"
+                >{{ firstName }}
                 </el-avatar>
               </div>
               <template #dropdown>
@@ -67,7 +85,7 @@ const API = proxy.$API
 const router = useRouter()
 const squareUrl = ref('https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png')
 const toMine = () => {
-  router.push('/home' + '/mine')
+  router.push('/home' + '/account')
 }
 // 登出
 const logout = async () => {
@@ -85,7 +103,7 @@ const logout = async () => {
 }
 // 点击左上方的图片跳转到我的空间
 const toMySpace = () => {
-  router.push('/home' + '/mySpace')
+  router.push('/home' + '/space')
 }
 const firstName = ref('')
 onMounted(async () => {
@@ -152,7 +170,7 @@ const extractColorByName = (name) => {
   font-weight: 600;
   color: #e8e8e8;
   font-family: Helvetica, Tahoma, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC',
-    'Microsoft YaHei', 'WenQuanYi Micro Hei';
+  'Microsoft YaHei', 'WenQuanYi Micro Hei';
   // font-family: 'Helvetica Neue', Helvetica, STHeiTi, Arial, sans-serif;
   cursor: pointer;
 }

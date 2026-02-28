@@ -13,9 +13,9 @@
       <ul class="sortOptions">
         <li v-for="(item, index) in editableTabs" :key="item.gid">
           <div
-            class="item-box flex-box hover-box"
-            :class="{ selectedItem: selectedIndex === index }"
-            @click="changeSelectIndex(index)"
+              class="item-box flex-box hover-box"
+              :class="{ selectedItem: selectedIndex === index }"
+              @click="changeSelectIndex(index)"
           >
             <div style="display: flex">
               <img src="@/assets/svg/移动 竖.svg" width="13" style="margin-right: 3px" alt="" />
@@ -24,17 +24,18 @@
             <div class="flex-box">
               <!-- 图标 -->
               <el-tooltip
-                class="box-item"
-                effect="dark"
-                :content="'查看图表'"
-                placement="bottom-end"
+                  show-after="500"
+                  class="box-item"
+                  effect="dark"
+                  :content="'查看图表'"
+                  placement="bottom-end"
               >
                 <!-- 传group是为了表示这个请求是查询分组图表数据 -->
                 <el-icon
-                  v-if="!(item.shortLinkCount === 0 || item.shortLinkCount === null)"
-                  class="edit"
-                  :class="{ zero: item.shortLinkCount === 0 }"
-                  @click="chartsVisible({ describe: item.name, gid: item.gid, group: true })"
+                    v-if="!(item.shortLinkCount === 0 || item.shortLinkCount === null)"
+                    class="edit"
+                    :class="{ zero: item.shortLinkCount === 0 }"
+                    @click="chartsVisible({ describe: item.name, gid: item.gid, group: true })"
                 >
                   <Histogram />
                 </el-icon>
@@ -49,7 +50,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item @click="showEditGroup(item.gid, item.name)"
-                      >编辑</el-dropdown-item
+                    >编辑</el-dropdown-item
                     >
                     <el-dropdown-item @click="deleteGroup(item.gid)">删除</el-dropdown-item>
                   </el-dropdown-menu>
@@ -63,9 +64,9 @@
       <div class="recycle-bin">
         <!-- 当selectIndex等于-1时代表选中的是回收站 -->
         <div
-          class="recycle-box hover-box"
-          :class="{ selectedItem: selectedIndex === -1 }"
-          @click="recycleBin"
+            class="recycle-box hover-box"
+            :class="{ selectedItem: selectedIndex === -1 }"
+            @click="recycleBin"
         >
           回收站
           <el-icon style="margin-left: 5px; font-size: 20px">
@@ -82,13 +83,13 @@
           <div style="width: 100%; display: flex">
             <!-- <el-input style="flex: 1; margin-right: 20px" placeholder="请输入http://或https://开头的连接或引用跳转程序"></el-input> -->
             <el-button
-              type="primary"
-              style="width: 130px; margin-right: 10px"
-              @click="isAddSmallLink = true"
-              >创建短链</el-button
+                type="primary"
+                style="width: 130px; margin-right: 10px"
+                @click="isAddSmallLink = true"
+            >创建短链</el-button
             >
             <el-button style="width: 130px; margin-right: 10px" @click="isAddSmallLinks = true"
-              >批量创建</el-button
+            >批量创建</el-button
             >
           </div>
         </div>
@@ -99,10 +100,10 @@
         </div>
         <!-- 表格展示区域 -->
         <el-table
-          :data="tableData"
-          height="calc(100vh - 240px)"
-          style="width: calc(100vw - 230px)"
-          :header-cell-style="{ background: '#f7f8fa', color: '#606266' }"
+            :data="tableData"
+            height="calc(100vh - 240px)"
+            style="width: calc(100vw - 230px)"
+            :header-cell-style="{ background: '#f7f8fa', color: '#606266' }"
         >
           <!-- 数据为空时展示的内容 -->
           <template #empty>
@@ -127,28 +128,29 @@
             </template>
             <template #default="scope">
               <div
-                class="table-link-box"
-                :class="{
+                  class="table-link-box"
+                  :class="{
                   isExpire: scope?.row?.validDateType === 1 && !isExpire(scope?.row?.validDate)
                 }"
               >
                 <img :src="getImgUrl(scope.row.favicon)" width="20" height="20" alt="" />
                 <div class="name-date">
-                  <el-tooltip :content="scope.row.describe">
+                  <el-tooltip show-after="500" :content="scope.row.describe">
                     <span>{{ scope.row.describe }}</span>
                   </el-tooltip>
                   <div class="time" style="display: flex">
                     <span>{{ scope.row.createTime }}</span>
                     <el-tooltip
-                      v-if="scope?.row?.validDate"
-                      :content="'到期时间：' + scope?.row?.validDate"
+                        show-after="500"
+                        v-if="scope?.row?.validDate"
+                        :content="'到期时间：' + scope?.row?.validDate"
                     >
                       <img
-                        v-if="isExpire(scope?.row?.validDate)"
-                        width="18"
-                        height="18"
-                        src="@/assets/png/沙漏倒计时.png"
-                        alt=""
+                          v-if="isExpire(scope?.row?.validDate)"
+                          width="18"
+                          height="18"
+                          src="@/assets/png/沙漏倒计时.png"
+                          alt=""
                       />
                       <div v-else><span>已失效</span></div>
                     </el-tooltip>
@@ -162,14 +164,14 @@
               <div class="table-url-box">
                 <!-- 当失效后就不能在点击跳转了 -->
                 <el-link
-                  type="primary"
-                  :underline="false"
-                  target="_blank"
-                  :disabled="scope?.row?.validDateType === 1 && !isExpire(scope?.row?.validDate)"
-                  :href="'http://' + scope.row.fullShortUrl"
-                  >{{ scope.row.domain + '/' + scope.row.shortUri }}</el-link
+                    type="primary"
+                    :underline="false"
+                    target="_blank"
+                    :disabled="scope?.row?.validDateType === 1 && !isExpire(scope?.row?.validDate)"
+                    :href="'http://' + scope.row.fullShortUrl"
+                >{{ scope.row.domain + '/' + scope.row.shortUri }}</el-link
                 >
-                <el-tooltip :content="scope.row.originUrl">
+                <el-tooltip show-after="500" :content="scope.row.originUrl">
                   <span>{{ scope.row.originUrl }}</span>
                 </el-tooltip>
               </div>
@@ -182,14 +184,15 @@
                 <QRCode :url="'http://' + scope.row.fullShortUrl"></QRCode>
                 <!-- 表格中的复制链接按钮 -->
                 <el-tooltip
-                  class="box-item"
-                  effect="dark"
-                  content="复制链接"
-                  placement="bottom-end"
+                    show-after="500"
+                    class="box-item"
+                    effect="dark"
+                    content="复制链接"
+                    placement="bottom-end"
                 >
                   <el-icon
-                    @click="copyUrl('http://' + scope.row.fullShortUrl)"
-                    class="table-edit copy-url"
+                      @click="copyUrl('http://' + scope.row.fullShortUrl)"
+                      class="table-edit copy-url"
                   >
                     <Share />
                   </el-icon>
@@ -208,10 +211,10 @@
                 </div>
                 <template #dropdown>
                   <el-dropdown-item @click="pageParams.orderTag = 'todayPv'"
-                    >今日访问次数</el-dropdown-item
+                  >今日访问次数</el-dropdown-item
                   >
                   <el-dropdown-item @click="pageParams.orderTag = 'totalPv'"
-                    >累计访问次数</el-dropdown-item
+                  >累计访问次数</el-dropdown-item
                   >
                 </template>
               </el-dropdown>
@@ -240,10 +243,10 @@
                 </div>
                 <template #dropdown>
                   <el-dropdown-item @click="pageParams.orderTag = 'todayUv'"
-                    >今日访问人数</el-dropdown-item
+                  >今日访问人数</el-dropdown-item
                   >
                   <el-dropdown-item @click="pageParams.orderTag = 'totalUv'"
-                    >累计访问人数</el-dropdown-item
+                  >累计访问人数</el-dropdown-item
                   >
                 </template>
               </el-dropdown>
@@ -272,10 +275,10 @@
                 </div>
                 <template #dropdown>
                   <el-dropdown-item @click="pageParams.orderTag = 'todayUip'"
-                    >今日IP数</el-dropdown-item
+                  >今日IP数</el-dropdown-item
                   >
                   <el-dropdown-item @click="pageParams.orderTag = 'totalUip'"
-                    >累计IP数</el-dropdown-item
+                  >累计IP数</el-dropdown-item
                   >
                 </template>
               </el-dropdown>
@@ -306,10 +309,11 @@
               <el-link :underline="false" class="el-link" type="primary">编辑</el-link> -->
                 <!-- 表格中的数据按钮 -->
                 <el-tooltip
-                  class="box-item"
-                  effect="dark"
-                  content="查看图表"
-                  placement="bottom-end"
+                    show-after="500"
+                    class="box-item"
+                    effect="dark"
+                    content="查看图表"
+                    placement="bottom-end"
                 >
                   <el-icon class="table-edit" @click="chartsVisible(scope.row)">
                     <Histogram />
@@ -318,17 +322,29 @@
                 <!-- 正常页面展示编辑和删除 -->
                 <template v-if="selectedIndex !== -1">
                   <!-- 表格中的编辑按钮 -->
-                  <el-tooltip class="box-item" effect="dark" content="编辑" placement="bottom-end">
+                  <el-tooltip
+                      show-after="500"
+                      class="box-item"
+                      effect="dark"
+                      content="编辑"
+                      placement="bottom-end"
+                  >
                     <el-icon @click="editLink(scope.row)" class="table-edit">
                       <Tools />
                     </el-icon>
                   </el-tooltip>
                   <!-- 删除按钮 -->
-                  <el-tooltip class="box-item" effect="dark" content="删除" placement="bottom-end">
+                  <el-tooltip
+                      show-after="500"
+                      class="box-item"
+                      effect="dark"
+                      content="删除"
+                      placement="bottom-end"
+                  >
                     <el-popconfirm
-                      width="100"
-                      title="是否移入回收站"
-                      @confirm="toRecycleBin(scope.row)"
+                        width="100"
+                        title="是否移入回收站"
+                        @confirm="toRecycleBin(scope.row)"
                     >
                       <template #reference>
                         <el-icon class="table-edit">
@@ -341,17 +357,29 @@
                 <!-- 回收站操作 -->
                 <template v-else>
                   <!-- 回收站中的恢复按钮 -->
-                  <el-tooltip class="box-item" effect="dark" content="恢复" placement="bottom-end">
+                  <el-tooltip
+                      show-after="500"
+                      class="box-item"
+                      effect="dark"
+                      content="恢复"
+                      placement="bottom-end"
+                  >
                     <el-icon @click="recoverLink(scope.row)" class="table-edit">
                       <HelpFilled />
                     </el-icon>
                   </el-tooltip>
                   <!-- 回收站中的删除按钮 -->
-                  <el-tooltip class="box-item" effect="dark" content="删除" placement="bottom-end">
+                  <el-tooltip
+                      show-after="500"
+                      class="box-item"
+                      effect="dark"
+                      content="删除"
+                      placement="bottom-end"
+                  >
                     <el-popconfirm
-                      width="300"
-                      title="删除后短链跳转会失效，同时停止数据统计，这是一个不可逆的操作，是否删除?"
-                      @confirm="removeLink(scope.row)"
+                        width="300"
+                        title="删除后短链跳转会失效，同时停止数据统计，这是一个不可逆的操作，是否删除?"
+                        @confirm="removeLink(scope.row)"
                     >
                       <template #reference>
                         <el-icon class="table-edit">
@@ -368,31 +396,31 @@
         <!-- 分页器 -->
         <div class="pagination-block">
           <el-pagination
-            v-model:current-page="pageParams.current"
-            v-model:page-size="pageParams.size"
-            :page-sizes="[10, 15, 20, 30]"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="totalNums"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
+              v-model:current-page="pageParams.current"
+              v-model:page-size="pageParams.size"
+              :page-sizes="[10, 15, 20, 30]"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="totalNums"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
           />
         </div>
       </div>
     </div>
     <!-- 查看数据弹框 -->
     <ChartsInfo
-      style="width: 880px"
-      ref="chartsInfoRef"
-      :title="chartsInfoTitle"
-      :info="chartsInfo"
-      :tableInfo="tableInfo"
-      :isGroup="isGroup"
-      :nums="nums"
-      :favicon="favicon1"
-      :originUrl="originUrl1"
-      @changeTime="changeTime"
-      @changePage="changePage"
-      top="60px"
+        style="width: 880px"
+        ref="chartsInfoRef"
+        :title="chartsInfoTitle"
+        :info="chartsInfo"
+        :tableInfo="tableInfo"
+        :isGroup="isGroup"
+        :nums="nums"
+        :favicon="favicon1"
+        :originUrl="originUrl1"
+        @changeTime="changeTime"
+        @changePage="changePage"
+        top="60px"
     ></ChartsInfo>
     <!-- 新建分组弹框 -->
     <el-dialog v-model="isAddGroup" title="新建短链接分组" style="width: 40%">
@@ -437,11 +465,12 @@
             </span>
           </template>
           <CreateLink
-            ref="createLink1Ref"
-            :groupInfo="editableTabs"
-            @onSubmit="addLink"
-            @cancel="cancelAddLink"
-            :is-single="true"
+              ref="createLink1Ref"
+              :groupInfo="editableTabs"
+              @onSubmit="addLink"
+              @cancel="cancelAddLink"
+              :defaultGid="pageParams.gid"
+              :is-single="true"
           ></CreateLink>
         </el-tab-pane>
         <el-tab-pane>
@@ -459,22 +488,22 @@
     <!-- 修改短链信息弹框 -->
     <el-dialog @close="afterAddLink" v-model="isEditLink" title="编辑链接">
       <EditLink
-        ref="editLinkRef"
-        :editData="editData"
-        :groupInfo="editableTabs"
-        @onSubmit="coverEditLink"
-        @cancel="coverEditLink"
+          ref="editLinkRef"
+          :editData="editData"
+          :groupInfo="editableTabs"
+          @onSubmit="coverEditLink"
+          @cancel="coverEditLink"
       ></EditLink>
     </el-dialog>
     <!-- 批量创建短链弹框 -->
     <el-dialog @close="afterAddLink" v-model="isAddSmallLinks" title="批量链接">
-      <CreateLink
-        ref="createLink2Ref"
-        :groupInfo="editableTabs"
-        @onSubmit="addLink"
-        @cancel="cancelAddLink"
-        :is-single="false"
-      ></CreateLink>
+      <CreateLinks
+          ref="createLink2Ref"
+          :groupInfo="editableTabs"
+          @onSubmit="addLink"
+          @cancel="cancelAddLink"
+          :defaultGid="pageParams.gid"
+      ></CreateLinks>
     </el-dialog>
   </div>
 </template>
@@ -485,6 +514,7 @@ import Sortable from 'sortablejs'
 import { cloneDeep } from 'lodash'
 import ChartsInfo from './components/chartsInfo/ChartsInfo.vue'
 import CreateLink from './components/createLink/CreateLink.vue'
+import CreateLinks from './components/createLink/CreateLinks.vue'
 import { getTodayFormatDate, getLastWeekFormatDate } from '@/utils/plugins.js'
 import EditLink from './components/editLink/EditLink.vue'
 import { ElMessage } from 'element-plus'
@@ -657,15 +687,15 @@ const initSortable = (className) => {
         if (selectedIndex.value === oldIndex) {
           selectedIndex.value = newIndex
         } else if (
-          oldIndex < newIndex &&
-          selectedIndex.value > oldIndex &&
-          selectedIndex.value <= newIndex
+            oldIndex < newIndex &&
+            selectedIndex.value > oldIndex &&
+            selectedIndex.value <= newIndex
         ) {
           selectedIndex.value = selectedIndex.value - 1
         } else if (
-          oldIndex > newIndex &&
-          selectedIndex.value < oldIndex &&
-          selectedIndex.value >= newIndex
+            oldIndex > newIndex &&
+            selectedIndex.value < oldIndex &&
+            selectedIndex.value >= newIndex
         ) {
           selectedIndex.value = selectedIndex.value + 1
         }
@@ -677,13 +707,13 @@ const initSortable = (className) => {
 }
 // 改变选中分组时触发
 watch(
-  () => selectedIndex.value,
-  (newValue) => {
-    // -1为回收站，不需要重新请求正常页面数据
-    if (newValue !== -1 && newValue !== -2) {
-      queryPage()
+    () => selectedIndex.value,
+    (newValue) => {
+      // -1为回收站，不需要重新请求正常页面数据
+      if (newValue !== -1 && newValue !== -2) {
+        queryPage()
+      }
     }
-  }
 )
 onMounted(() => {
   initSortable('sortOptions')
@@ -696,11 +726,11 @@ const pageParams = reactive({
   orderTag: null
 })
 watch(
-  () => pageParams.orderTag,
-  (nV) => {
-    console.log(nV)
-    queryPage()
-  }
+    () => pageParams.orderTag,
+    (nV) => {
+      console.log(nV)
+      queryPage()
+    }
 )
 const totalNums = ref(0)
 const queryPage = async () => {
@@ -735,12 +765,12 @@ const recycleBinNums = ref(0) // 回收站中的数量
 // 获取回收站页面，gid到时候要删除
 const queryRecycleBinPage = () => {
   API.smallLinkPage
-    .queryRecycleBin({ current: pageParams.current, size: pageParams.size })
-    .then((res) => {
-      tableData.value = res.data?.data?.records
-      totalNums.value = +res.data?.data?.total
-      recycleBinNums.value = totalNums.value
-    })
+      .queryRecycleBin({ current: pageParams.current, size: pageParams.size })
+      .then((res) => {
+        tableData.value = res.data?.data?.records
+        totalNums.value = +res.data?.data?.total
+        recycleBinNums.value = totalNums.value
+      })
 }
 // 点击回收站
 const recycleBin = () => {
@@ -867,41 +897,41 @@ const coverEditLink = () => {
 const toRecycleBin = (data) => {
   const { gid, fullShortUrl } = data
   API.smallLinkPage
-    .toRecycleBin({ gid, fullShortUrl })
-    .then((res) => {
-      ElMessage.success('删除成功')
-      getGroupInfo(queryPage)
-    })
-    .catch((reason) => {
-      ElMessage.error('删除失败')
-    })
+      .toRecycleBin({ gid, fullShortUrl })
+      .then((res) => {
+        ElMessage.success('删除成功')
+        getGroupInfo(queryPage)
+      })
+      .catch((reason) => {
+        ElMessage.error('删除失败')
+      })
 }
 // 回收站中恢复
 const recoverLink = (data) => {
   const { gid, fullShortUrl } = data
   API.smallLinkPage
-    .recoverLink({ gid, fullShortUrl })
-    .then((res) => {
-      ElMessage.success('恢复成功')
-      queryRecycleBinPage()
-      getGroupInfo(queryPage)
-    })
-    .catch((reason) => {
-      ElMessage.error('恢复失败')
-    })
+      .recoverLink({ gid, fullShortUrl })
+      .then((res) => {
+        ElMessage.success('恢复成功')
+        queryRecycleBinPage()
+        getGroupInfo(queryPage)
+      })
+      .catch((reason) => {
+        ElMessage.error('恢复失败')
+      })
 }
 // 从回收站中删除
 const removeLink = (data) => {
   const { gid, fullShortUrl } = data
   API.smallLinkPage
-    .removeLink({ gid, fullShortUrl })
-    .then((res) => {
-      ElMessage.success('删除成功')
-      queryRecycleBinPage()
-    })
-    .catch((reason) => {
-      ElMessage.error('删除失败')
-    })
+      .removeLink({ gid, fullShortUrl })
+      .then((res) => {
+        ElMessage.success('删除成功')
+        queryRecycleBinPage()
+      })
+      .catch((reason) => {
+        ElMessage.error('删除失败')
+      })
 }
 </script>
 
@@ -945,8 +975,8 @@ const removeLink = (data) => {
     height: 43px;
     width: 190px;
     font-family:
-      PingFangSC-Semibold,
-      PingFang SC;
+        PingFangSC-Semibold,
+        PingFang SC;
     font-weight: 520;
   }
 
