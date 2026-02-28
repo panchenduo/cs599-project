@@ -81,19 +81,28 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
-
+    @Value("${short-link.domain.default}")
+    private String createShortLinkDefaultDomain;
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO reqDTO) {
         String shortLinkSuffix = generateSuffix(reqDTO);
-        String fullShortLink = reqDTO.getDomain() + "/" + shortLinkSuffix;
-        LinkDO linkDO = BeanUtil.copyProperties(reqDTO, LinkDO.class);
-        linkDO.setShortUri(shortLinkSuffix);
-        linkDO.setFullShortUrl(fullShortLink);
-        linkDO.setFavicon(getFavicon(reqDTO.getOriginUrl()));
-        linkDO.setEnableStatus(0);
-        linkDO.setTotalPv(0);
-        linkDO.setTotalUv(0);
-        linkDO.setTotalUip(0);
+        String fullShortLink = createShortLinkDefaultDomain + "/" + shortLinkSuffix;
+        LinkDO linkDO = LinkDO.builder()
+                .domain(createShortLinkDefaultDomain)
+                .originUrl(reqDTO.getOriginUrl())
+                .gid(reqDTO.getGid())
+                .createdType(reqDTO.getCreatedType())
+                .validDateType(reqDTO.getValidDateType())
+                .validDate(reqDTO.getValidDate())
+                .describe(reqDTO.getDescribe())
+                .shortUri(shortLinkSuffix)
+                .enableStatus(0)
+                .totalPv(0)
+                .totalUv(0)
+                .totalUip(0)
+                .fullShortUrl(fullShortLink)
+                .favicon(getFavicon(reqDTO.getOriginUrl()))
+                .build();
         ShortLinkGotoDO linkGotoDO = ShortLinkGotoDO.builder()
                 .fullShortUrl(fullShortLink)
                 .gid(reqDTO.getGid())
@@ -192,7 +201,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
     @Override
     public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
         String serverName = request.getServerName();
-        String fullShortUrl = serverName + "/" + shortUri;
+        String serverPort = Optional.of(request.getServerPort())
+                .filter(each -> !Objects.equals(each, 80))
+                .map(String::valueOf)
+                .map(each -> ":" + each)
+                .orElse("");
+        String fullShortUrl = serverName + serverPort + "/" + shortUri;
+//        String fullShortUrl = serverName + "/" + shortUri;
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         //缓存中短链接存在
         if (StrUtil.isNotBlank(originalLink)) {
