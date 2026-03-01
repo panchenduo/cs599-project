@@ -566,7 +566,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
             String originUrl = reqDTO.getOriginUrl();
             originUrl += UUID.randomUUID().toString();
             shortLinkSuffix = HashUtil.hashToBase62(originUrl);
-            boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(reqDTO.getDomain() + "/" + shortLinkSuffix);
+            boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(createShortLinkDefaultDomain+ "/" + shortLinkSuffix);
             if (!contains) {
                 return shortLinkSuffix;
             }
