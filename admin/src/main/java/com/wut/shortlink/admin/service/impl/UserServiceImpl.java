@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wut.shortlink.admin.common.constant.RedisCacheConstant;
 import com.wut.shortlink.admin.common.convention.exception.ClientException;
+import com.wut.shortlink.admin.common.convention.exception.ServiceException;
 import com.wut.shortlink.admin.common.convention.result.Result;
 import com.wut.shortlink.admin.common.convention.result.Results;
 import com.wut.shortlink.admin.common.enums.UserErrorCodeEnum;
@@ -52,7 +53,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     public Result<UserRespDTO> getUserByUsername(String username) {
         UserDO userDO = baseMapper.selectOne(new QueryWrapper<UserDO>().eq("username", username));
         if (userDO == null) {
-            throw new ClientException(UserErrorCodeEnum.USER_NOT_EXIST);
+            throw new ServiceException(UserErrorCodeEnum.USER_NOT_EXIST);
         }
         UserRespDTO result = new UserRespDTO();
         BeanUtils.copyProperties(userDO, result);
