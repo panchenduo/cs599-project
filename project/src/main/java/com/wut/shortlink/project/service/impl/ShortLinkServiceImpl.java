@@ -134,7 +134,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
                 reqDTO.getOriginUrl(),
                 LinkUtil.getLinkCacheValidTime(reqDTO.getValidDate()), TimeUnit.MILLISECONDS
         );
-        shortUriCreateCachePenetrationBloomFilter.add(shortLinkSuffix);
+        shortUriCreateCachePenetrationBloomFilter.add(fullShortLink);
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl("http://" + linkDO.getFullShortUrl())
                 .originUrl(linkDO.getOriginUrl())
