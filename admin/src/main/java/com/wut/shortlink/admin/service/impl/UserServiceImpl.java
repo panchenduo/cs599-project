@@ -1,6 +1,7 @@
 package com.wut.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -30,6 +31,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.wut.shortlink.admin.common.constant.RedisCacheConstant.USER_LOGIN_KEY;
@@ -108,13 +110,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(UserErrorCodeEnum.USER_NOT_EXIST);
         }
         //判断用户是否已经登录过了
-        Boolean isLogged = stringRedisTemplate.hasKey(USER_LOGIN_KEY + userLoginReqDTO.getUsername());
+        /*Boolean isLogged = stringRedisTemplate.hasKey(USER_LOGIN_KEY + userLoginReqDTO.getUsername());
         if (isLogged!= null && isLogged) {
             throw new ClientException(UserErrorCodeEnum.USER_ALREADY_LOGIN);
+        }*/
+        //多端登录
+        Map<Object ,Object> hasLoginMap = stringRedisTemplate.opsForHash().entries("login_" + userLoginReqDTO.getUsername());
+        if (CollUtil.isNotEmpty(hasLoginMap)) {
+            String token = hasLoginMap.keySet().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElseThrow(() -> new ClientException("用户登录错误"));
+            return new UserLoginRespDTO(token);
         }
         String uuid = UUID.randomUUID().toString();
         stringRedisTemplate.opsForHash().put(USER_LOGIN_KEY + userLoginReqDTO.getUsername(), uuid, JSONUtil.toJsonStr(userDO));
-        stringRedisTemplate.expire(USER_LOGIN_KEY + userLoginReqDTO.getUsername(), 30, TimeUnit.DAYS);
+        stringRedisTemplate.expire(USER_LOGIN_KEY + userLoginReqDTO.getUsername(), 30, TimeUnit.MINUTES);
         return new UserLoginRespDTO(uuid);
     }
 
