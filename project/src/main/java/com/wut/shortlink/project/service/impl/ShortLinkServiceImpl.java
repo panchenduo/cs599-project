@@ -209,12 +209,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
                         .eq(LinkDO::getGid, hasShortLinkDO.getGid())
                         .eq(LinkDO::getDelFlag, 0)
                         .eq(LinkDO::getDelTime, 0L)
-                        .eq(LinkDO::getEnableStatus, 0);
-                LinkDO delShortLinkDO = LinkDO.builder()
-                        .delTime(System.currentTimeMillis())
-                        .build();
-                delShortLinkDO.setDelFlag(1);
-                baseMapper.update(delShortLinkDO, linkUpdateWrapper);
+                        .eq(LinkDO::getEnableStatus, 0)
+                        .set(LinkDO::getDelTime, System.currentTimeMillis())
+                        .set(LinkDO::getDelFlag, 1);
+                baseMapper.update(null, linkUpdateWrapper);
                 LinkDO shortLinkDO = LinkDO.builder()
                         .domain(createShortLinkDefaultDomain)
                         .originUrl(requestParam.getOriginUrl())
