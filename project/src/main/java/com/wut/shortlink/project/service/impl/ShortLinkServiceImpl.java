@@ -441,7 +441,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
     @Override
     public void shortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
         Map<String, String> producerMap = new HashMap<>();
-        producerMap.put("fullShortUrl", fullShortUrl);
+        //延时队列回调的时候，fullShortUrl传的是null，所以这里要重新获取
+        String actualUrl = StrUtil.isNotBlank(fullShortUrl) ? fullShortUrl : statsRecord.getFullShortUrl();
+        producerMap.put("fullShortUrl", actualUrl);
         producerMap.put("gid", gid);
         producerMap.put("statsRecord", JSON.toJSONString(statsRecord));
         shortLinkStatsSaveProducer.send(producerMap);
