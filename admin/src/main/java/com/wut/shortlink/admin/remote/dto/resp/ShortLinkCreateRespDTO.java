@@ -1,13 +1,17 @@
 package com.wut.shortlink.admin.remote.dto.resp;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 短链接创建响应
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ShortLinkCreateRespDTO {
     /**
      * 分组标识

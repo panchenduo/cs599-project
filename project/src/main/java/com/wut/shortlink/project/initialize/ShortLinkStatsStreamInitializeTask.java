@@ -11,7 +11,6 @@ import static com.wut.shortlink.project.common.constant.RedisKeyConstant.SHORT_L
 
 /**
  * 初始化短链接监控消息队列消费者组
- * 公众号：马丁玩编程，回复：加群，添加马哥微信（备注：link）获取项目资料
  */
 @Component
 @RequiredArgsConstructor
