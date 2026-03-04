@@ -8,7 +8,7 @@ public class RedisCacheConstant {
     /**
      * 用户登录缓存
      */
-    public static final String USER_LOGIN_KEY = "login:";
+    public static final String USER_LOGIN_KEY = "short-link:login:";
 
     /**
      * 分组创建分布式锁
