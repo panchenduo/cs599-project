@@ -91,6 +91,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
     private String createShortLinkDefaultDomain;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO reqDTO) {
         verificationWhitelist(reqDTO.getOriginUrl());
         String shortLinkSuffix = generateSuffix(reqDTO);
