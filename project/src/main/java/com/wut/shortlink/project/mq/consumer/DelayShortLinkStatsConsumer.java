@@ -24,6 +24,7 @@ import static com.wut.shortlink.project.common.constant.RedisKeyConstant.DELAY_Q
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Deprecated
 public class DelayShortLinkStatsConsumer implements InitializingBean {
 
     private final RedissonClient redissonClient;

@@ -18,6 +18,7 @@ import static com.wut.shortlink.project.common.constant.RedisKeyConstant.DELAY_Q
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class DelayShortLinkStatsProducer {
 
     private final RedissonClient redissonClient;
