@@ -1,3 +1,4 @@
+
 package com.wut.shortlink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

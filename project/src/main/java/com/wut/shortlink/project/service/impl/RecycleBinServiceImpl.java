@@ -1,7 +1,6 @@
 package com.wut.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -47,12 +46,7 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> 
 
     @Override
     public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
-        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
-                .in(LinkDO::getGid, requestParam.getGidList())
-                .eq(LinkDO::getEnableStatus, 1)
-                .eq(LinkDO::getDelFlag, 0)
-                .orderByDesc(LinkDO::getUpdateTime);
-        IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
+        IPage<LinkDO> resultPage = baseMapper.pageRecycleBinLink(requestParam);
         return resultPage.convert(each -> {
             ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
             result.setDomain("http://" + result.getDomain());
