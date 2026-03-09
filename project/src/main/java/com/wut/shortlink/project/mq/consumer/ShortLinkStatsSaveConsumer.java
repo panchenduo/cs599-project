@@ -67,7 +67,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
             if (messageQueueIdempotentHandler.isAccomplish(id.toString())) {
                 return;
             }
-            throw new ServiceException("消息未完成流程，需要消息队列重试");//直到过期时间后，消息队列会自动删除该幂等标识
+            throw new ServiceException("消息未完成流程，需要消息队列重试");
         }
         try {
             Map<String, String> producerMap = message.getValue();
@@ -77,15 +77,14 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                 ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
                 actualSaveShortLinkStats(fullShortUrl, gid, statsRecord);
             }
-            //todo actualSaveShortLinkStats中如果没拿到锁，会将消息放到延迟队列，后续返回给消息队列，但此时已经设置完成过消息，所以此处有bug
-            messageQueueIdempotentHandler.setAccomplish(id.toString());
             stringRedisTemplate.opsForStream().delete(Objects.requireNonNull(stream), id.getValue());
         } catch (Throwable ex) {
             // 某某某情况宕机了
             messageQueueIdempotentHandler.delMessageProcessed(id.toString());
             log.error("记录短链接监控消费异常", ex);
-            throw new RuntimeException("消费异常，要求 MQ 重新投递", ex);
+            throw ex;
         }
+        messageQueueIdempotentHandler.setAccomplish(id.toString());
     }
 
     public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
