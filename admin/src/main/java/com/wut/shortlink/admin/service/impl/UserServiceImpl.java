@@ -29,6 +29,7 @@ import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.wut.shortlink.admin.common.constant.RedisCacheConstant.USER_LOGIN_KEY;
+import static com.wut.shortlink.admin.common.enums.UserErrorCodeEnum.USER_EXIST;
 
 /**
  * 用户接口实现层
@@ -71,18 +73,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
         }
         RLock lock = redissonClient.getLock(RedisCacheConstant.LOCK_USER_REGISTER_KEY + userRegisterReqDTO.getUsername());
-        try {
-            if (lock.tryLock()) {
-                int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterReqDTO, UserDO.class));
-                if (inserted < 1) {
-                    throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
-                }
-                userRegisterCachePenetrationBloomFilter.add(userRegisterReqDTO.getUsername());
-                groupService.saveGroup(userRegisterReqDTO.getUsername(),"默认分组");
-                return;
-            }
+        if (!lock.tryLock()){
             throw new ClientException(UserErrorCodeEnum.USER_NAME_EXIST);
-        } finally {
+        }
+        try {
+            int inserted = baseMapper.insert(BeanUtil.toBean(userRegisterReqDTO, UserDO.class));
+            if (inserted < 1) {
+                throw new ClientException(UserErrorCodeEnum.USER_SAVE_ERROR);
+            }
+            userRegisterCachePenetrationBloomFilter.add(userRegisterReqDTO.getUsername());
+            groupService.saveGroup(userRegisterReqDTO.getUsername(),"默认分组");
+        }catch (DuplicateKeyException e){
+            throw new ClientException(USER_EXIST);
+        }
+        finally {
             lock.unlock();
         }
 
