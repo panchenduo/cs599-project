@@ -6,7 +6,7 @@
         <div class="flex-item">
           <div>
             <img :src="getUrl(item?.browser, item?.os)" width="25" alt="" />
-            <span>{{ item?.browser || item?.os }} {{ item?.ratio * 100 }}%</span>
+            <span>{{ item?.browser || item?.os }} {{ (item?.ratio * 100).toFixed(2) }}%</span>
           </div>
           <div>
             <span>{{ item?.cnt }} 次</span>
@@ -14,10 +14,11 @@
         </div>
         <div>
           <el-progress
-              color="#3464e0"
-              :text-inside="true"
-              :stroke-width="12"
-              :percentage="item?.ratio * 100"
+            color="#3464e0"
+            :text-inside="true"
+            :show-text="false"
+            :stroke-width="12"
+            :percentage="(item?.ratio * 100).toFixed(2)"
           />
         </div>
       </div>
@@ -86,14 +87,14 @@ const getUrl = (img1, img2) => {
   } else if (img1?.includes('opera') || img2?.includes('opera')) {
     return opera
   }
-  else if (img1?.includes('internet') || img2?.includes('internet')) {
+   else if (img1?.includes('internet') || img2?.includes('internet')) {
     return IE
   }
   else if (
-      img1?.includes('wechat') ||
-      img1?.includes('微信') ||
-      img2?.includes('wechat') ||
-      img2?.includes('微信')
+    img1?.includes('wechat') ||
+    img1?.includes('微信') ||
+    img2?.includes('wechat') ||
+    img2?.includes('微信')
   ) {
     return WeChat
   } else if (img1?.includes('linux') || img2?.includes('linux')) {

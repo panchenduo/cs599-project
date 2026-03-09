@@ -22,7 +22,7 @@
       </el-form-item>
       <el-form-item v-if="formData.validDateType === 1" label="选择时间">
         <el-date-picker :disabled-date="disabledDate" v-model="formData.validDate" value-format="YYYY-MM-DD HH:mm:ss"
-                        type="datetime" placeholder="选择日期" :shortcuts="shortcuts" />
+          type="datetime" placeholder="选择日期" :shortcuts="shortcuts" />
         <span class="alert">链接失效后将自动跳转到404页面 !</span>
       </el-form-item>
       <el-form-item>
@@ -50,7 +50,6 @@ const API = proxy.$API
 const editData = props.editData
 // url的校验规则
 const reg = /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+))(:\d+)?(\/.*)?(\?.*)?(#.*)?$/;
-console.log(editData)
 // 自定义时间中选择几天
 const shortcuts = [
   {
@@ -125,52 +124,52 @@ const queryTitle = (url) => {
 }
 const getTitle = fd(queryTitle, 1000)
 watch(
-    () => formData.originUrl,
-    nV => {
-      originUrlRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
-      // 只有在描述内容为空时才会去查询链接对应的标题
-      if (!formData.describe) {
-        getTitle(nV)
-      }
+  () => formData.originUrl,
+  nV => {
+    originUrlRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
+    // 只有在描述内容为空时才会去查询链接对应的标题
+    if (!formData.describe) {
+      getTitle(nV)
     }
+  }
 )
 const maxDescribeRows = ref(100) // 最多多少行
 // 描述信息有多少行
 const describeRows = ref(0)
 watch(
-    () => formData.describe,
-    nV => {
-      describeRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
-    }
+  () => formData.describe,
+  nV => {
+    describeRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
+  }
 )
 
 // 将分组数据传给选择分组选项并默认选中第一项
 watch(
-    () => props.groupInfo,
-    nV => {
-      groupInfo.value = nV
-      formData.gid = nV[0].gid
-    },
-    {
-      immediate: true
-    }
+  () => props.groupInfo,
+  nV => {
+    groupInfo.value = nV
+    formData.gid = nV[0].gid
+  },
+  {
+    immediate: true
+  }
 )
 watch(
-    () => props.editData,
-    (nV) => {
-      // console.log(nV, oV)
-      formData.originUrl = nV.originUrl
-      formData.gid = nV.gid
-      formData.originGid = nV.gid
-      formData.createdType = nV.createdType
-      formData.validDate = nV.validDate
-      formData.describe = nV.describe
-      formData.validDateType = nV.validDateType
-      formData.fullShortUrl = nV.fullShortUrl
-    },
-    {
-      immediate: true
-    }
+  () => props.editData,
+  (nV) => {
+    // console.log(nV, oV)
+    formData.originUrl = nV.originUrl
+    formData.gid = nV.gid
+    formData.originGid = nV.gid
+    formData.createdType = nV.createdType
+    formData.validDate = nV.validDate
+    formData.describe = nV.describe
+    formData.validDateType = nV.validDateType
+    formData.fullShortUrl = nV.fullShortUrl
+  },
+  {
+    immediate: true
+  }
 )
 // 校验规则
 const formRule = reactive({
@@ -229,7 +228,6 @@ const disabledDate = (time) => {
   return new Date(time).getTime() < new Date().getTime()//选当前时间之后的时间
 }
 
-console.log(new Date().getTime())
 // 将组件里面的确认和取消点击事件传出去
 const emits = defineEmits(['onSubmit', 'cancel', 'updatePage'])
 // 点击确定按钮后的校验
@@ -242,10 +240,8 @@ const onSubmit = async (formEl) => {
     if (valid) {
       emits('onSubmit', false)
       const res = await API.smallLinkPage.editSmallLink(formData)
-      console.log('submit!', res)
       emits('updatePage')
     } else {
-      console.log('error submit!', fields)
     }
   })
 }

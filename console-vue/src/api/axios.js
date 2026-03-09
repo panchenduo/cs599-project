@@ -1,16 +1,15 @@
 import axios from 'axios'
-import { getToken, getUsername } from '@/core/auth.js'
-// import Router from '../router'
+import {getToken, getUsername} from '@/core/auth.js'
+import {isNotEmpty} from '@/utils/plugins.js'
+import router from "@/router";
 import { ElMessage } from 'element-plus'
-import { isNotEmpty } from '@/utils/plugins.js'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-// const baseURL = '/resourcesharing/organizational'
+
+// const router = useRouter()
 const baseURL = '/api/short-link/admin/v1'
 // 创建实例
 const http = axios.create({
     // api 代理为服务器请求地址
-    baseURL: '/api' + baseURL,
+    baseURL: baseURL,
     timeout: 15000
 })
 // 请求拦截 -->在请求发送之前做一些事情
@@ -18,7 +17,6 @@ http.interceptors.request.use(
     (config) => {
         config.headers.Token = isNotEmpty(getToken()) ? getToken() : ''
         config.headers.Username = isNotEmpty(getUsername()) ? getUsername() : ''
-        // console.log('获取到的token和username', getToken(), getUsername())
         return config
     },
     (error) => {

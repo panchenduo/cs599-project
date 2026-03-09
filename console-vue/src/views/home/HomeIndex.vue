@@ -3,21 +3,21 @@
     <el-container>
       <el-header height="54px" style="padding: 0">
         <div class="header">
-          <div @click="toMySpace" class="logo">拿个offer-SaaS短链接</div>
+          <div @click="toMySpace" class="logo">拿个offer-SaaS短链接@马丁</div>
           <div style="display: flex; align-items: center">
             <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="https://nageoffer.com/shortlink/"
-            >文档</a
+              class="link-span"
+              style="text-decoration: none"
+              target="_blank"
+              href="https://nageoffer.com/shortlink/"
+              >官方文档</a
             >
             <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="https://nageoffer.com/group/"
-            >社群</a
+              class="link-span"
+              style="text-decoration: none"
+              target="_blank"
+              href="https://nageoffer.com/group/"
+              >加沟通群</a
             >
             <a
                 class="link-span"
@@ -30,8 +30,8 @@
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
-                href="https://nageoffer.com"
-            >控制台样例</a
+                href="http://shortlink.magestack.cn"
+            >演示环境</a
             >
             <el-dropdown>
               <div class="block">
@@ -181,7 +181,7 @@ const truncateText = (text, maxLength) => {
   font-weight: 600;
   color: #e8e8e8;
   font-family: Helvetica, Tahoma, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Heiti SC',
-  'Microsoft YaHei', 'WenQuanYi Micro Hei';
+    'Microsoft YaHei', 'WenQuanYi Micro Hei';
   // font-family: 'Helvetica Neue', Helvetica, STHeiTi, Arial, sans-serif;
   cursor: pointer;
 }

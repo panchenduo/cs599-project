@@ -3,30 +3,30 @@
     <el-form ref="ruleFormRef" :model="formData" :rules="formRule" label-width="80px">
       <el-form-item label="跳转链接" prop="originUrls">
         <el-input
-            :rows="4"
-            v-model="formData.originUrls"
-            type="textarea"
-            placeholder="请输入http://或https://开头的链接或应用跳转链接，一行一个，最多100行"
+          :rows="4"
+          v-model="formData.originUrls"
+          type="textarea"
+          placeholder="请输入http://或https://开头的链接或应用跳转链接，一行一个，最多100行"
         />
         <span style="font-size: 12px">{{ originUrlRows + '/' + maxDescribeRows }}</span>
       </el-form-item>
       <el-form-item label="描述信息" prop="describes">
         <el-input
-            v-loading="isLoading"
-            :rows="4"
-            v-model="formData.describes"
-            type="textarea"
-            placeholder="请输入描述信息，一行一个，描述信息行数请与链接行数相等"
+          v-loading="isLoading"
+          :rows="4"
+          v-model="formData.describes"
+          type="textarea"
+          placeholder="请输入描述信息，一行一个，描述信息行数请与链接行数相等"
         />
         <span style="font-size: 12px">{{ describeRows + '/' + maxDescribeRows }}</span>
       </el-form-item>
       <el-form-item label="短链分组" prop="gid">
         <el-select v-model="formData.gid" placeholder="请选择">
           <el-option
-              v-for="item in groupInfo"
-              :key="item.gid"
-              :label="item.name"
-              :value="item.gid"
+            v-for="item in groupInfo"
+            :key="item.gid"
+            :label="item.name"
+            :value="item.gid"
           />
         </el-select>
       </el-form-item>
@@ -38,23 +38,23 @@
       </el-form-item>
       <el-form-item v-if="formData.validDateType === 1" label="选择时间">
         <el-date-picker
-            :disabled-date="disabledDate"
-            v-model="formData.validDate"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            type="datetime"
-            placeholder="选择日期"
-            :shortcuts="shortcuts"
+          :disabled-date="disabledDate"
+          v-model="formData.validDate"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="datetime"
+          placeholder="选择日期"
+          :shortcuts="shortcuts"
         />
         <span class="alert">链接失效后将自动跳转到404页面 !</span>
       </el-form-item>
       <el-form-item>
         <div style="width: 100%; display: flex; justify-content: flex-end">
           <el-button
-              class="buttons"
-              type="primary"
-              :disabled="submitDisable"
-              @click="onSubmit(ruleFormRef)"
-          >确认</el-button
+            class="buttons"
+            type="primary"
+            :disabled="submitDisable"
+            @click="onSubmit(ruleFormRef)"
+            >确认</el-button
           >
           <el-button class="buttons" @click="cancel">取消</el-button>
         </div>
@@ -78,7 +78,7 @@ const { proxy } = getCurrentInstance()
 const API = proxy.$API
 // url的校验规则
 const reg =
-    /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+))(:\d+)?(\/.*)?(\?.*)?(#.*)?$/
+  /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+))(:\d+)?(\/.*)?(\?.*)?(#.*)?$/
 // 自定义时间中选择几天
 const shortcuts = [
   {
@@ -153,51 +153,50 @@ const isLoading = ref(false)
 // }
 // const getTitle = fd(queryTitle, 1000)
 watch(
-    () => formData.originUrls,
-    (nV) => {
-      originUrlRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
-      // // 只有在描述内容为空时才会去查询链接对应的标题
-      // if (!formData.describe) {
-      //   // 外边包一层防抖
-      //   getTitle(nV)
-      // }
-    }
+  () => formData.originUrls,
+  (nV) => {
+    originUrlRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
+    // // 只有在描述内容为空时才会去查询链接对应的标题
+    // if (!formData.describe) {
+    //   // 外边包一层防抖
+    //   getTitle(nV)
+    // }
+  }
 )
 const maxDescribeRows = ref(100) // 最多多少行
 // 描述信息有多少行
 const describeRows = ref(0)
 watch(
-    () => formData.describes,
-    (nV) => {
-      describeRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
-    }
+  () => formData.describes,
+  (nV) => {
+    describeRows.value = (nV || '').split(/\r|\r\n|\n/)?.length ?? 0
+  }
 )
 
 // 将分组数据传给选择分组选项并默认选中第一项
 watch(
-    () => props.groupInfo,
-    (nV) => {
-      groupInfo.value = nV
-      // console.log('默认的gid', props.defaultGid)
-      formData.gid = nV[0].gid
-    },
-    {
-      immediate: true
-    }
+  () => props.groupInfo,
+  (nV) => {
+    groupInfo.value = nV
+    // console.log('默认的gid', props.defaultGid)
+    formData.gid = nV[0].gid
+  },
+  {
+    immediate: true
+  }
 )
 watch(
-    () => props.defaultGid,
-    (nV) => {
-      console.log('数据发生变化了', props.defaultGid)
-      if (props.defaultGid) {
-        formData.gid = props.defaultGid
-      } else {
-        formData.gid = nV[0].gid
-      }
-    },
-    {
-      immediate: true
+  () => props.defaultGid,
+  (nV) => {
+    if (props.defaultGid) {
+      formData.gid = props.defaultGid
+    } else {
+      formData.gid = nV[0].gid
     }
+  },
+  {
+    immediate: true
+  }
 )
 
 // 校验规则
@@ -277,9 +276,9 @@ const emits = defineEmits(['onSubmit', 'cancel'])
 
 function downLoadXls(res) {
   let url = window.URL.createObjectURL(
-      new Blob([res.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      })
+    new Blob([res.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
   )
   // 创建A标签
   let link = document.createElement('a')
@@ -304,7 +303,6 @@ const onSubmit = async (formEl) => {
   }
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log('这是formdata', formData)
       let { describes, originUrls } = formData
       describes = transferStrToArray(describes)
       originUrls = transferStrToArray(originUrls)
@@ -314,7 +312,6 @@ const onSubmit = async (formEl) => {
         emits('onSubmit', false)
         submitDisable.value = false
         downLoadXls(res)
-        console.log(res.data)
       } else if (!res?.data?.success) {
         ElMessage.error(res?.data?.message)
       } else {
@@ -323,7 +320,6 @@ const onSubmit = async (formEl) => {
         submitDisable.value = false
       }
     } else {
-      console.log('error submit!', fields)
       // ElMessage.error('创建失败！')
     }
   })
