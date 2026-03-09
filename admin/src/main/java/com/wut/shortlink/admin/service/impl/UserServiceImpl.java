@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wut.shortlink.admin.common.biz.user.UserContext;
 import com.wut.shortlink.admin.common.constant.RedisCacheConstant;
 import com.wut.shortlink.admin.common.convention.exception.ClientException;
 import com.wut.shortlink.admin.common.convention.exception.ServiceException;
@@ -34,6 +35,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.wut.shortlink.admin.common.constant.RedisCacheConstant.USER_LOGIN_KEY;
@@ -94,8 +96,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void update(UserUpdateReqDTO userUpdateReqDTO) {
-        //todo 判断当前用户名是否是登录用户
-
+        if (!Objects.equals(userUpdateReqDTO.getUsername(), UserContext.getUsername())) {
+            throw new ClientException("当前登录用户修改请求异常");
+        }
         LambdaUpdateWrapper<UserDO> lambdaUpdateWrapper = Wrappers.lambdaUpdate(UserDO.class)
                 .eq(UserDO::getUsername, userUpdateReqDTO.getUsername());
         int updated = baseMapper.update(BeanUtil.toBean(userUpdateReqDTO, UserDO.class), lambdaUpdateWrapper);
