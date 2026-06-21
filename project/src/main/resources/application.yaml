@@ -19,6 +19,31 @@ spring:
       port: 6379
       password: 123456
 
+  kafka:
+    # 你的 Kafka 服务器地址（127.0.0.1 就是你本机，9092 是 Kafka 默认端口）
+    bootstrap-servers: 127.0.0.1:9092
+
+    # 生产者（发消息的配置）
+    producer:
+      # Kafka 只认识字符串或字节流。这里告诉它：把我们的 Key 和 Value 都当成字符串发出去
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+    # 消费者（收消息的配置）
+    consumer:
+      # 消费者组的名字（同一个组里的消费者，大家一起平分活干，不会重复消费）
+      group-id: short-link-stats-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 【极其重要】千万别让框架自动提交“已消费”。我们要自己写代码，确认存入数据库了，再手动提交！
+      enable-auto-commit: false
+
+    # 监听器配置（配合上面的手动提交使用）
+    listener:
+      # 告诉框架：只要我代码里调用了 ack.acknowledge()，你立刻帮我告诉 Kafka 这条消息处理完了
+      ack-mode: manual_immediate
+
+
   mvc:
     view:
       prefix: /templates/

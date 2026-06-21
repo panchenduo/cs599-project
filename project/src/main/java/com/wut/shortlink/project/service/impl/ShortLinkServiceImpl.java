@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -25,6 +24,7 @@ import com.wut.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import com.wut.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
 import com.wut.shortlink.project.dto.resp.*;
+import com.wut.shortlink.project.mq.producer.KafkaShortLinkStatsSaveProducer;
 import com.wut.shortlink.project.mq.producer.ShortLinkStatsSaveProducer;
 import com.wut.shortlink.project.service.ShortLinkService;
 import com.wut.shortlink.project.toolkit.HashUtil;
@@ -72,6 +72,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
     private final RedissonClient redissonClient;
     private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
     private final ShortLinkStatsSaveProducer shortLinkStatsSaveProducer;
+    private final KafkaShortLinkStatsSaveProducer kafkaShortLinkStatsSaveProducer;
 
 
     @Value("${short-link.stats.locale.amap-key}")
@@ -365,10 +366,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
 
     @Override
     public void shortLinkStats(ShortLinkStatsRecordDTO statsRecord) {
-        Map<String, String> producerMap = new HashMap<>();
+      /*  Map<String, String> producerMap = new HashMap<>();
         producerMap.put("statsRecord", JSON.toJSONString(statsRecord));
-        // 消息队列为什么选用RocketMQ？详情查看：https://nageoffer.com/shortlink/question
-        shortLinkStatsSaveProducer.send(producerMap);
+        shortLinkStatsSaveProducer.send(producerMap);*/
+        kafkaShortLinkStatsSaveProducer.shortLinkStats(statsRecord);
     }
 
     private String generateSuffix(ShortLinkCreateReqDTO reqDTO) {
@@ -389,30 +390,39 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, LinkDO> i
         }
     }
 
-    @SneakyThrows
     private String getFavicon(String url) {
-        URL targetUrl = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestMethod("GET");
-        connection.connect();
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-            String redirectUrl = connection.getHeaderField("Location");
-            if (redirectUrl != null) {
-                URL newUrl = new URL(redirectUrl);
-                connection = (HttpURLConnection) newUrl.openConnection();
-                connection.setRequestMethod("GET");
-                connection.connect();
-                responseCode = connection.getResponseCode();
+        try {
+            URL targetUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+            connection.setInstanceFollowRedirects(false);
+            connection.setConnectTimeout(1500);
+            connection.setReadTimeout(1500);
+            connection.setRequestMethod("GET");
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                String redirectUrl = connection.getHeaderField("Location");
+                if (redirectUrl != null) {
+                    URL newUrl = new URL(redirectUrl);
+                    connection = (HttpURLConnection) newUrl.openConnection();
+                    connection.setConnectTimeout(1500);
+                    connection.setReadTimeout(1500);
+                    connection.setRequestMethod("GET");
+                    connection.connect();
+                    responseCode = connection.getResponseCode();
+                }
             }
-        }
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            Document document = Jsoup.connect(url).get();
-            Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon]").first();
-            if (faviconLink != null) {
-                return faviconLink.attr("abs:href");
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                Document document = Jsoup.connect(url)
+                        .timeout(1500)
+                        .get();
+                Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon]").first();
+                if (faviconLink != null) {
+                    return faviconLink.attr("abs:href");
+                }
             }
+        } catch (Throwable ex) {
+            log.warn("Fetch favicon failed, url: {}", url, ex);
         }
         return null;
     }
