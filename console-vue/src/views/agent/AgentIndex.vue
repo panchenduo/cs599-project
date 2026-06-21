@@ -95,6 +95,30 @@
       </section>
 
       <section class="panel">
+        <h3>模型调度</h3>
+        <div class="model-routing">
+          <div>
+            <span>默认模型</span>
+            <strong>{{ agentSettings?.model?.chat?.defaultModel || 'rule-planner-v2' }}</strong>
+          </div>
+          <div>
+            <span>Provider</span>
+            <strong>{{ providerCount }}</strong>
+          </div>
+        </div>
+        <div v-if="modelCandidates.length" class="model-list">
+          <div v-for="item in modelCandidates" :key="item.id" class="model-item">
+            <div>
+              <strong>{{ item.id }}</strong>
+              <span>{{ item.provider }} / {{ item.model }}</span>
+            </div>
+            <em>{{ item.enabled ? item.health : 'disabled' }}</em>
+          </div>
+        </div>
+        <span v-else class="empty">暂无模型配置</span>
+      </section>
+
+      <section class="panel">
         <h3>调度状态</h3>
         <p class="muted">{{ latestResult?.dispatchStatus || '等待首次调度' }}</p>
       </section>
@@ -151,6 +175,7 @@ const API = proxy.$API
 const loading = ref(false)
 const message = ref('')
 const latestResult = ref(null)
+const agentSettings = ref(null)
 const messageContainer = ref(null)
 const traceChartRef = ref(null)
 const statusChartRef = ref(null)
@@ -185,6 +210,8 @@ const avgDuration = computed(() => {
   const total = toolCalls.value.reduce((sum, item) => sum + Number(item.durationMs || 0), 0)
   return Math.round(total / toolCalls.value.length)
 })
+const modelCandidates = computed(() => agentSettings.value?.model?.chat?.candidates || [])
+const providerCount = computed(() => Object.keys(agentSettings.value?.model?.providers || {}).length)
 const intentHistory = computed(() => {
   const counter = {}
   messages.value
@@ -256,6 +283,15 @@ const resizeCharts = () => {
   traceChart?.resize()
   statusChart?.resize()
   intentChart?.resize()
+}
+
+const loadSettings = async () => {
+  try {
+    const res = await API.agent.settings()
+    agentSettings.value = res?.data?.data
+  } catch (error) {
+    agentSettings.value = null
+  }
 }
 
 const resetChat = () => {
@@ -331,6 +367,7 @@ watch(latestResult, () => nextTick(renderCharts), { deep: true })
 watch(messages, () => nextTick(renderCharts), { deep: true })
 
 onMounted(() => {
+  loadSettings()
   nextTick(renderCharts)
   window.addEventListener('resize', resizeCharts)
 })
@@ -583,6 +620,85 @@ onBeforeUnmount(() => {
 
   h3 {
     margin-bottom: 4px;
+  }
+}
+
+.model-routing {
+  display: grid;
+  grid-template-columns: 1fr 86px;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  div {
+    min-width: 0;
+    padding: 10px;
+    border-radius: 7px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  span {
+    display: block;
+    margin-bottom: 6px;
+    color: #778396;
+    font-size: 12px;
+  }
+
+  strong {
+    display: block;
+    color: #172033;
+    font-size: 14px;
+    word-break: break-word;
+  }
+}
+
+.model-list {
+  display: grid;
+  gap: 8px;
+}
+
+.model-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid #dbe3ed;
+  border-radius: 7px;
+  background: #ffffff;
+
+  div {
+    min-width: 0;
+  }
+
+  strong,
+  span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: #172033;
+    font-size: 13px;
+  }
+
+  span {
+    margin-top: 4px;
+    color: #6c7888;
+    font-size: 12px;
+  }
+
+  em {
+    flex: none;
+    max-width: 118px;
+    color: #2563eb;
+    font-size: 12px;
+    font-style: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

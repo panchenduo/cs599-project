@@ -7,5 +7,11 @@ export default {
       method: 'post',
       data
     })
+  },
+  settings() {
+    return http({
+      url: '/agent/settings',
+      method: 'get'
+    })
   }
 }
