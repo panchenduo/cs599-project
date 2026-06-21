@@ -2,9 +2,12 @@ target/
 node_modules/
 console-vue/node_modules/
 console-vue/dist/
+src/console-vue/node_modules/
+src/console-vue/dist/
 .env
 .env.*
 *.log
+.agents/
 tmp/
 tmp_pdf_extract.txt
 __pycache__/

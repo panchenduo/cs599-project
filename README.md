@@ -20,20 +20,23 @@ ShortLink Agent 是对企业级短链 SaaS 系统的 Agent 化改造版本。系
 
 ## 目录结构
 
-- `admin/`：用户、分组、管理端接口与远程调用封装。
-- `project/`：短链核心业务，包括创建、跳转、访问统计、回收站、URL 标题获取和 Kafka 统计消费。
-- `aggregation/`：聚合服务与智能短链运营 Agent，包括 Agent API、模型调度、工具编排、会话记忆和熔断降级。
-- `gateway/`：Spring Cloud Gateway 网关与登录态校验。
-- `console-vue/`：管理端前端，包括短链管理、统计图表、回收站和智能助手页面。
-- `docs/`：课程报告、架构说明、系统截图和最终 PDF/Word 文档。
-- `resources/database/`：数据库初始化 SQL。
-- `resources/finalDemand/`：课程期末大作业要求原始 PDF。
-- `src/`：课程要求的源代码入口说明，映射到本 Maven 多模块工程的实际源码目录。
+- `docs/`：项目文档，包括最终报告 PDF、Word 源文件、Specs、架构说明、Agent 改造说明和系统截图。
+- `src/`：项目源代码与配套资源。
+  - `src/admin/`：用户、分组、管理端接口与远程调用封装。
+  - `src/project/`：短链核心业务，包括创建、跳转、访问统计、回收站、URL 标题获取和 Kafka 统计消费。
+  - `src/aggregation/`：聚合服务与智能短链运营 Agent，包括 Agent API、模型调度、工具编排、会话记忆和熔断降级。
+  - `src/gateway/`：Spring Cloud Gateway 网关与登录态校验。
+  - `src/console-vue/`：管理端前端，包括短链管理、统计图表、回收站和智能助手页面。
+  - `src/resources/database/`：数据库初始化 SQL。
+  - `src/resources/finalDemand/`：课程期末大作业要求原始 PDF。
+- `README.md`：项目入口说明。
+- `.gitignore`：排除编译产物、IDE 配置、临时文件和敏感配置。
+- `LICENSE`：开源协议。
 
 ## 环境搭建
 
 1. 安装 JDK 17、Maven、Node.js、MySQL、Redis、Nacos、Kafka。
-2. 初始化数据库，参考 `resources/database/link.sql`。
+2. 初始化数据库，参考 `src/resources/database/link.sql`。
 3. 配置运行环境。注意不要在代码中硬编码 API Key，建议通过环境变量或本地配置文件注入：
    - `AGENT_MODEL_BASE_URL`
    - `AGENT_MODEL_API_KEY`
@@ -44,13 +47,14 @@ ShortLink Agent 是对企业级短链 SaaS 系统的 Agent 化改造版本。系
 4. 编译后端：
 
    ```bash
+   cd src
    mvn -pl aggregation -am -DskipTests compile
    ```
 
 5. 启动前端：
 
    ```bash
-   cd console-vue
+   cd src/console-vue
    npm install
    npm run dev
    ```
