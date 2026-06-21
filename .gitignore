@@ -1,4 +1,12 @@
 target/
+node_modules/
+console-vue/node_modules/
+console-vue/dist/
+.env
+.env.*
+*.log
+tmp/
+tmp_pdf_extract.txt
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
