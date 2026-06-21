@@ -10,6 +10,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  */
 @EnableDiscoveryClient
 @SpringBootApplication(scanBasePackages = {
+        "com.wut.shortlink.aggregation",
         "com.wut.shortlink.admin",
         "com.wut.shortlink.project"
 })

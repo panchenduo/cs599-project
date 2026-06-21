@@ -3,36 +3,9 @@
     <el-container>
       <el-header height="54px" style="padding: 0">
         <div class="header">
-          <div @click="toMySpace" class="logo">拿个offer-SaaS短链接@马丁</div>
+          <div @click="toMySpace" class="logo">智能短链</div>
           <div style="display: flex; align-items: center">
-            <a
-              class="link-span"
-              style="text-decoration: none"
-              target="_blank"
-              href="https://nageoffer.com/shortlink/"
-              >官方文档</a
-            >
-            <a
-              class="link-span"
-              style="text-decoration: none"
-              target="_blank"
-              href="https://nageoffer.com/group/"
-              >加沟通群</a
-            >
-            <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="https://nageoffer.com/shortlink/video/"
-            >🔥视频教程</a
-            >
-            <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="http://shortlink.magestack.cn"
-            >演示环境</a
-            >
+            <button class="agent-entry" type="button" @click="toAgent">智能助手</button>
             <el-dropdown>
               <div class="block">
                 <span
@@ -110,6 +83,9 @@ const logout = async () => {
 // 点击左上方的图片跳转到我的空间
 const toMySpace = () => {
   router.push('/home' + '/space')
+}
+const toAgent = () => {
+  router.push('/home' + '/agent')
 }
 const username = ref('')
 onMounted(async () => {
@@ -204,6 +180,24 @@ const truncateText = (text, maxLength) => {
   text-decoration: underline !important;
   opacity: 1;
   color: #fff;
+}
+
+.agent-entry {
+  height: 30px;
+  margin-right: 22px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 4px;
+  background: transparent;
+  color: #fff;
+  opacity: .82;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.agent-entry:hover {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, .46);
 }
 
 .name-span {

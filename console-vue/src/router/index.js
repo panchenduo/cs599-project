@@ -34,6 +34,12 @@ const router = createRouter({
           meta: { title: '账户设置' }
         },
         {
+          path: 'agent',
+          name: 'ShortLinkAgent',
+          component: () => import('@/views/agent/AgentIndex.vue'),
+          meta: { title: '智能助手' }
+        },
+        {
           path: 'account',
           name: 'Mine',
           component: () => import('@/views/mine/MineIndex.vue'),
