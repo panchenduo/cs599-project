@@ -1,34 +1,41 @@
 <template>
   <div class="agent-page">
-    <section class="chat-panel">
-      <header class="panel-header">
+    <section class="workspace">
+      <header class="workspace-header">
         <div>
           <h2>智能短链运营助手</h2>
-          <p>创建短链、查询分组、分析访问数据</p>
+          <p>自然语言编排短链创建、分组查询、访问统计和运营分析</p>
         </div>
-        <el-button size="small" @click="resetChat">清空</el-button>
+        <div class="header-actions">
+          <span class="status-dot"></span>
+          <span>Java Agent</span>
+          <el-button size="small" @click="resetChat">清空会话</el-button>
+        </div>
       </header>
 
-      <div class="messages">
+      <div ref="messageContainer" class="messages">
         <div
           v-for="item in messages"
           :key="item.id"
           class="message"
           :class="item.role"
         >
-          <div class="bubble">{{ item.content }}</div>
+          <div class="avatar">{{ item.role === 'user' ? '我' : 'AI' }}</div>
+          <div class="bubble">
+            <pre>{{ item.content }}</pre>
+          </div>
         </div>
       </div>
 
       <div class="quick-actions">
-        <el-button
+        <button
           v-for="item in quickPrompts"
           :key="item"
-          size="small"
+          type="button"
           @click="sendPrompt(item)"
         >
           {{ item }}
-        </el-button>
+        </button>
       </div>
 
       <div class="composer">
@@ -44,14 +51,30 @@
       </div>
     </section>
 
-    <aside class="trace-panel">
-      <div class="trace-block">
-        <h3>意图</h3>
-        <div class="intent">{{ latestResult?.intent || '等待输入' }}</div>
-      </div>
+    <aside class="inspector">
+      <section class="metric-row">
+        <div>
+          <span>意图</span>
+          <strong>{{ latestResult?.intent || '待识别' }}</strong>
+        </div>
+        <div>
+          <span>工具</span>
+          <strong>{{ latestResult?.toolCalls?.length || 0 }}</strong>
+        </div>
+      </section>
 
-      <div class="trace-block">
-        <h3>建议</h3>
+      <section class="panel">
+        <h3>调度状态</h3>
+        <p class="muted">{{ latestResult?.dispatchStatus || '等待首次调度' }}</p>
+      </section>
+
+      <section class="panel">
+        <h3>会话记忆</h3>
+        <p class="memory">{{ latestResult?.memorySummary || '暂无压缩记忆' }}</p>
+      </section>
+
+      <section class="panel">
+        <h3>建议动作</h3>
         <div v-if="latestResult?.suggestions?.length" class="suggestions">
           <button
             v-for="item in latestResult.suggestions"
@@ -63,27 +86,32 @@
           </button>
         </div>
         <span v-else class="empty">暂无建议</span>
-      </div>
+      </section>
 
-      <div class="trace-block">
-        <h3>工具调用</h3>
+      <section class="panel">
+        <h3>工具调用轨迹</h3>
         <div v-if="latestResult?.toolCalls?.length" class="tool-list">
-          <div v-for="(tool, index) in latestResult.toolCalls" :key="index" class="tool-item">
+          <div
+            v-for="(tool, index) in latestResult.toolCalls"
+            :key="index"
+            class="tool-item"
+            :class="{ failed: !tool.success }"
+          >
             <div class="tool-title">
               <span>{{ tool.toolName }}</span>
               <em>{{ tool.success ? '成功' : '失败' }}</em>
             </div>
-            <p>{{ tool.message }}</p>
+            <p>{{ tool.message }} · {{ tool.durationMs || 0 }}ms</p>
           </div>
         </div>
         <span v-else class="empty">暂无工具调用</span>
-      </div>
+      </section>
     </aside>
   </div>
 </template>
 
 <script setup>
-import { ref, getCurrentInstance } from 'vue'
+import { ref, getCurrentInstance, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const { proxy } = getCurrentInstance()
@@ -91,27 +119,45 @@ const API = proxy.$API
 const loading = ref(false)
 const message = ref('')
 const latestResult = ref(null)
+const messageContainer = ref(null)
+const conversationId = ref(localStorage.getItem('shortlink_agent_conversation_id') || '')
 const messages = ref([
   {
     id: Date.now(),
     role: 'assistant',
-    content: '我是智能短链运营助手，可以帮你创建短链、批量创建、查询分组和生成访问分析。'
+    content: '我是智能短链运营助手。你可以让我创建短链、批量创建、查询分组、查看短链列表，或分析最近访问表现。'
   }
 ])
 const quickPrompts = [
   '查看当前分组列表',
   '查看当前分组短链列表',
-  '分析默认分组最近 7 天访问情况'
+  '分析默认分组最近 7 天访问情况',
+  '帮我给 https://www.zhihu.com 创建一个 7 天有效的短链'
 ]
 
 const resetChat = () => {
-  messages.value = []
+  messages.value = [
+    {
+      id: Date.now(),
+      role: 'assistant',
+      content: '会话已清空。我会开启新的上下文。'
+    }
+  ]
   latestResult.value = null
+  conversationId.value = ''
+  localStorage.removeItem('shortlink_agent_conversation_id')
 }
 
 const sendPrompt = (content) => {
   message.value = content
   sendMessage()
+}
+
+const scrollToBottom = async () => {
+  await nextTick()
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
 }
 
 const sendMessage = async () => {
@@ -126,20 +172,33 @@ const sendMessage = async () => {
     content
   })
   message.value = ''
+  await scrollToBottom()
   loading.value = true
   try {
-    const res = await API.agent.chat({ message: content })
+    const res = await API.agent.chat({
+      conversationId: conversationId.value,
+      message: content
+    })
     const data = res?.data?.data
     latestResult.value = data
+    if (data?.conversationId) {
+      conversationId.value = data.conversationId
+      localStorage.setItem('shortlink_agent_conversation_id', data.conversationId)
+    }
     messages.value.push({
       id: Date.now() + 1,
       role: 'assistant',
       content: data?.answer || '没有获取到有效回复'
     })
   } catch (error) {
-    ElMessage.error(error?.response?.data?.message || '智能助手请求失败')
+    messages.value.push({
+      id: Date.now() + 1,
+      role: 'assistant',
+      content: error?.response?.data?.message || '智能助手请求失败，请确认后端服务和网关已经启动。'
+    })
   } finally {
     loading.value = false
+    scrollToBottom()
   }
 }
 </script>
@@ -148,80 +207,127 @@ const sendMessage = async () => {
 .agent-page {
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 16px;
-  padding: 16px;
-  background: #f4f6f8;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 14px;
+  padding: 14px;
   box-sizing: border-box;
+  background: #eef2f5;
+  color: #1f2933;
 }
 
-.chat-panel,
-.trace-panel {
+.workspace,
+.inspector {
   min-height: 0;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
 }
 
-.chat-panel {
+.workspace {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto auto;
+  background: #ffffff;
+  border: 1px solid #dde4ec;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.panel-header {
-  height: 72px;
+.workspace-header {
+  height: 76px;
   padding: 0 18px;
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid #e8edf2;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   h2 {
-    margin: 0 0 6px;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1f2937;
+    margin: 0 0 7px;
+    font-size: 19px;
+    font-weight: 650;
+    color: #152033;
   }
 
   p {
     margin: 0;
-    color: #6b7280;
+    color: #6c7888;
     font-size: 13px;
   }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #526071;
+  font-size: 13px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #24a148;
 }
 
 .messages {
   padding: 18px;
   overflow-y: auto;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    repeating-linear-gradient(90deg, rgba(30, 64, 175, .04) 0 1px, transparent 1px 44px);
 }
 
 .message {
-  display: flex;
-  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: start;
 
   &.user {
-    justify-content: flex-end;
-  }
+    grid-template-columns: minmax(0, 1fr) 34px;
 
-  &.assistant {
-    justify-content: flex-start;
+    .avatar {
+      grid-column: 2;
+      background: #1d4ed8;
+      color: #fff;
+    }
+
+    .bubble {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: end;
+      background: #2457c5;
+      color: #fff;
+    }
   }
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .bubble {
-  max-width: min(680px, 82%);
-  white-space: pre-wrap;
-  line-height: 1.7;
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: #f1f5f9;
-  color: #273142;
-  font-size: 14px;
-}
+  max-width: min(760px, 88%);
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #f4f7fb;
+  color: #263241;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
 
-.message.user .bubble {
-  color: #fff;
-  background: #3478f6;
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.72;
+    font-family: inherit;
+    font-size: 14px;
+  }
 }
 
 .quick-actions {
@@ -229,40 +335,86 @@ const sendMessage = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+
+  button {
+    border: 1px solid #d3dce7;
+    background: #fff;
+    color: #334155;
+    border-radius: 4px;
+    padding: 7px 9px;
+    cursor: pointer;
+  }
 }
 
 .composer {
-  border-top: 1px solid #edf0f3;
+  border-top: 1px solid #e8edf2;
   padding: 14px 18px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px;
+  grid-template-columns: minmax(0, 1fr) 86px;
   gap: 10px;
+  background: #fbfcfe;
 }
 
-.trace-panel {
-  padding: 16px;
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   overflow-y: auto;
 }
 
-.trace-block {
-  margin-bottom: 18px;
+.metric-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  div {
+    min-height: 64px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #dde4ec;
+    border-radius: 8px;
+  }
+
+  span {
+    display: block;
+    color: #778396;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  strong {
+    color: #152033;
+    font-size: 16px;
+    font-weight: 650;
+    word-break: break-word;
+  }
+}
+
+.panel {
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #dde4ec;
+  border-radius: 8px;
 
   h3 {
     margin: 0 0 10px;
     font-size: 14px;
-    font-weight: 600;
-    color: #374151;
+    font-weight: 650;
+    color: #1f2933;
   }
 }
 
-.intent {
-  min-height: 34px;
-  line-height: 34px;
-  padding: 0 10px;
-  border-radius: 4px;
-  background: #eef2ff;
-  color: #3147a3;
+.muted,
+.memory,
+.empty {
+  color: #6c7888;
   font-size: 13px;
+  line-height: 1.65;
+}
+
+.memory {
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .suggestions {
@@ -271,11 +423,12 @@ const sendMessage = async () => {
 
   button {
     text-align: left;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    color: #374151;
-    border-radius: 4px;
-    padding: 8px 9px;
+    border: 1px solid #dbe3ed;
+    background: #f9fbfd;
+    color: #334155;
+    border-radius: 5px;
+    padding: 9px 10px;
+    line-height: 1.45;
     cursor: pointer;
   }
 }
@@ -286,13 +439,23 @@ const sendMessage = async () => {
 }
 
 .tool-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border: 1px solid #dce8df;
+  background: #f8fcf9;
+  border-radius: 7px;
   padding: 10px;
+
+  &.failed {
+    border-color: #f0d1d1;
+    background: #fff8f8;
+
+    em {
+      color: #b42318;
+    }
+  }
 
   p {
     margin: 8px 0 0;
-    color: #6b7280;
+    color: #6c7888;
     font-size: 12px;
   }
 }
@@ -301,27 +464,25 @@ const sendMessage = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
+  color: #172033;
   font-size: 13px;
-  color: #111827;
+  font-weight: 600;
 
   em {
+    flex: none;
     font-style: normal;
-    color: #14804a;
+    color: #198754;
   }
 }
 
-.empty {
-  color: #9ca3af;
-  font-size: 13px;
-}
-
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   .agent-page {
     grid-template-columns: 1fr;
   }
 
-  .trace-panel {
-    max-height: 300px;
+  .inspector {
+    max-height: 360px;
   }
 }
 </style>

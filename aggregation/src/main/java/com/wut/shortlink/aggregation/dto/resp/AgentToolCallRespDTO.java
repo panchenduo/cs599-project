@@ -35,6 +35,11 @@ public class AgentToolCallRespDTO {
     private Boolean success;
 
     /**
+     * 调用耗时
+     */
+    private Long durationMs;
+
+    /**
      * 调用说明
      */
     private String message;

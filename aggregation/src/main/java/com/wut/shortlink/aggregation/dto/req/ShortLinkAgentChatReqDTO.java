@@ -9,6 +9,11 @@ import lombok.Data;
 public class ShortLinkAgentChatReqDTO {
 
     /**
+     * 会话标识，为空时服务端自动生成
+     */
+    private String conversationId;
+
+    /**
      * 用户自然语言指令
      */
     private String message;
