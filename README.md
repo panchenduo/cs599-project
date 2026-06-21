@@ -73,7 +73,6 @@ ShortLink Agent 是对企业级短链 SaaS 系统的 Agent 化改造版本。系
 
 ## 项目文档
 
-- 最终报告 Word 版：`docs/CS599_大作业报告.docx`
 - 最终报告 PDF 版：`docs/CS599_大作业报告.pdf`
 - Specs 规格文档：`docs/specs.md`
 - 架构说明：`docs/architecture.md`
