@@ -70,6 +70,51 @@ short-link:
         - zhihu.com
         - juejin.cn
         - cnblogs.com
+  agent:
+    memory:
+      enabled: true
+      history-keep-turns: 6
+      summary-start-turns: 8
+      summary-max-chars: 360
+    model:
+      providers:
+        openai-compatible:
+          url: ${AGENT_MODEL_BASE_URL:https://api.openai.com/v1}
+          api-key: ${AGENT_MODEL_API_KEY:}
+          endpoints:
+            chat: /chat/completions
+        local-compatible:
+          url: ${LOCAL_MODEL_BASE_URL:http://127.0.0.1:11434/v1}
+          api-key: ${LOCAL_MODEL_API_KEY:}
+          endpoints:
+            chat: /chat/completions
+      chat:
+        default-model: rule-planner-v2
+        deep-thinking-model: deep-analysis-v1
+        candidates:
+          - id: rule-planner-v2
+            provider: openai-compatible
+            model: ${AGENT_CHAT_MODEL:gpt-4.1-mini}
+            priority: 10
+            enabled: true
+            supports-thinking: false
+          - id: local-compatible-v1
+            provider: local-compatible
+            model: ${LOCAL_CHAT_MODEL:qwen2.5:7b}
+            priority: 20
+            enabled: false
+            supports-thinking: false
+          - id: safe-fallback
+            provider: builtin
+            model: safe-fallback
+            priority: 100
+            enabled: true
+            supports-thinking: false
+      selection:
+        failure-threshold: 2
+        open-duration-ms: 30000
+      stream:
+        message-chunk-size: 5
 
 mybatis-plus:
   configuration:

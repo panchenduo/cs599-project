@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wut.shortlink.admin.common.biz.user.UserContext;
 import com.wut.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.wut.shortlink.admin.service.GroupService;
+import com.wut.shortlink.aggregation.config.AgentModelProperties;
 import com.wut.shortlink.aggregation.dto.req.ShortLinkAgentChatReqDTO;
 import com.wut.shortlink.aggregation.dto.resp.AgentToolCallRespDTO;
 import com.wut.shortlink.aggregation.dto.resp.ShortLinkAgentChatRespDTO;
@@ -21,6 +22,7 @@ import com.wut.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import com.wut.shortlink.project.dto.resp.ShortLinkStatsRespDTO;
 import com.wut.shortlink.project.service.ShortLinkService;
 import com.wut.shortlink.project.service.ShortLinkStatsService;
+import com.wut.shortlink.project.service.UrlTitleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +63,8 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
     private final GroupService groupService;
     private final ShortLinkService shortLinkService;
     private final ShortLinkStatsService shortLinkStatsService;
+    private final UrlTitleService urlTitleService;
+    private final AgentModelProperties agentModelProperties;
     private final AgentMemoryService agentMemoryService;
     private final AgentRoutingExecutor agentRoutingExecutor;
 
@@ -78,7 +82,7 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
         }
 
         AgentRoutingExecutor.RoutedResult<ShortLinkAgentChatRespDTO> routed = agentRoutingExecutor.executeWithFallback(
-                List.of(PRIMARY_AGENT, FALLBACK_AGENT),
+                resolveModelCandidates(),
                 candidate -> {
                     if (FALLBACK_AGENT.equals(candidate)) {
                         return buildSafeFallbackResp(toolCalls);
@@ -95,6 +99,25 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
 
         agentMemoryService.append(conversationId, userId, "assistant", response.getAnswer());
         return response;
+    }
+
+    private List<String> resolveModelCandidates() {
+        List<String> configuredCandidates = agentModelProperties.getChat().getCandidates().stream()
+                .filter(each -> Boolean.TRUE.equals(each.getEnabled()))
+                .sorted((left, right) -> Optional.ofNullable(left.getPriority()).orElse(100)
+                        .compareTo(Optional.ofNullable(right.getPriority()).orElse(100)))
+                .map(AgentModelProperties.ModelCandidate::getId)
+                .filter(this::notBlank)
+                .toList();
+        if (configuredCandidates.isEmpty()) {
+            return List.of(PRIMARY_AGENT, FALLBACK_AGENT);
+        }
+        if (configuredCandidates.contains(FALLBACK_AGENT)) {
+            return configuredCandidates;
+        }
+        List<String> actualCandidates = new ArrayList<>(configuredCandidates);
+        actualCandidates.add(FALLBACK_AGENT);
+        return actualCandidates;
     }
 
     private ShortLinkAgentChatRespDTO dispatch(ShortLinkAgentChatReqDTO requestParam,
@@ -150,7 +173,7 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
                 .createdType(0)
                 .validDateType(resolveValidDateType(requestParam, message))
                 .validDate(resolveValidDate(requestParam, message))
-                .describe(firstNotBlank(requestParam.getDescribe(), buildDescribe(message, originUrl)))
+                .describe(resolveDescribe(requestParam.getDescribe(), message, originUrl, toolCalls))
                 .build();
         try {
             ShortLinkCreateRespDTO createResp = callTool("createShortLink", createReq, () -> shortLinkService.createShortLink(createReq), toolCalls);
@@ -179,7 +202,7 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
         }
         ShortLinkBatchCreateReqDTO batchReq = new ShortLinkBatchCreateReqDTO();
         batchReq.setOriginUrls(urls);
-        batchReq.setDescribes(urls.stream().map(each -> firstNotBlank(requestParam.getDescribe(), "Agent 批量创建：" + each)).toList());
+        batchReq.setDescribes(urls.stream().map(each -> resolveDescribe(requestParam.getDescribe(), message, each, toolCalls)).toList());
         batchReq.setGid(group.getGid());
         batchReq.setCreatedType(0);
         batchReq.setValidDateType(resolveValidDateType(requestParam, message));
@@ -511,6 +534,31 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
             return "Agent 创建短链";
         }
         return cleaned;
+    }
+
+    private String resolveDescribe(String explicitDescribe, String message, String originUrl, List<AgentToolCallRespDTO> toolCalls) {
+        if (notBlank(explicitDescribe)) {
+            return explicitDescribe;
+        }
+        try {
+            String title = callTool("getTitleByUrl", Map.of("url", originUrl), () -> urlTitleService.getTitleByUrl(originUrl), toolCalls);
+            if (isUsableTitle(title)) {
+                return title.trim();
+            }
+        } catch (RuntimeException ignored) {
+            // Use the local fallback below when title extraction is unavailable.
+        }
+        String fallback = buildDescribe(message, originUrl);
+        return Objects.equals(fallback, "Agent 创建短链") ? originUrl : fallback;
+    }
+
+    private boolean isUsableTitle(String title) {
+        if (!notBlank(title)) {
+            return false;
+        }
+        String normalized = title.trim();
+        return !Objects.equals(normalized, "Error while fetching title.")
+                && !Objects.equals(normalized, "Unknown title");
     }
 
     private LocalDate parseDate(String value, LocalDate defaultValue) {
