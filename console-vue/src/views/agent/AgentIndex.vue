@@ -63,6 +63,37 @@
         </div>
       </section>
 
+      <section class="agent-metrics">
+        <div>
+          <span>成功率</span>
+          <strong>{{ toolSuccessRate }}%</strong>
+        </div>
+        <div>
+          <span>平均耗时</span>
+          <strong>{{ avgDuration }}ms</strong>
+        </div>
+        <div>
+          <span>会话轮次</span>
+          <strong>{{ userMessageCount }}</strong>
+        </div>
+      </section>
+
+      <section class="panel trace-panel">
+        <h3>链路追踪概览</h3>
+        <div ref="traceChartRef" class="chart-box"></div>
+      </section>
+
+      <section class="panel chart-grid">
+        <div>
+          <h3>工具状态</h3>
+          <div ref="statusChartRef" class="chart-box small"></div>
+        </div>
+        <div>
+          <h3>意图分布</h3>
+          <div ref="intentChartRef" class="chart-box small"></div>
+        </div>
+      </section>
+
       <section class="panel">
         <h3>调度状态</h3>
         <p class="muted">{{ latestResult?.dispatchStatus || '等待首次调度' }}</p>
@@ -111,7 +142,8 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance, nextTick } from 'vue'
+import * as echarts from 'echarts'
+import { ref, getCurrentInstance, nextTick, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const { proxy } = getCurrentInstance()
@@ -120,6 +152,12 @@ const loading = ref(false)
 const message = ref('')
 const latestResult = ref(null)
 const messageContainer = ref(null)
+const traceChartRef = ref(null)
+const statusChartRef = ref(null)
+const intentChartRef = ref(null)
+let traceChart = null
+let statusChart = null
+let intentChart = null
 const conversationId = ref(localStorage.getItem('shortlink_agent_conversation_id') || '')
 const messages = ref([
   {
@@ -135,6 +173,91 @@ const quickPrompts = [
   '帮我给 https://www.zhihu.com 创建一个 7 天有效的短链'
 ]
 
+const toolCalls = computed(() => latestResult.value?.toolCalls || [])
+const userMessageCount = computed(() => messages.value.filter((item) => item.role === 'user').length)
+const toolSuccessRate = computed(() => {
+  if (!toolCalls.value.length) return 0
+  const successCount = toolCalls.value.filter((item) => item.success).length
+  return Math.round((successCount / toolCalls.value.length) * 100)
+})
+const avgDuration = computed(() => {
+  if (!toolCalls.value.length) return 0
+  const total = toolCalls.value.reduce((sum, item) => sum + Number(item.durationMs || 0), 0)
+  return Math.round(total / toolCalls.value.length)
+})
+const intentHistory = computed(() => {
+  const counter = {}
+  messages.value
+    .filter((item) => item.intent)
+    .forEach((item) => {
+      counter[item.intent] = (counter[item.intent] || 0) + 1
+    })
+  if (latestResult.value?.intent) {
+    counter[latestResult.value.intent] = (counter[latestResult.value.intent] || 0) + 1
+  }
+  return Object.entries(counter).map(([name, value]) => ({ name, value }))
+})
+
+const ensureCharts = () => {
+  if (traceChartRef.value && !traceChart) traceChart = echarts.init(traceChartRef.value)
+  if (statusChartRef.value && !statusChart) statusChart = echarts.init(statusChartRef.value)
+  if (intentChartRef.value && !intentChart) intentChart = echarts.init(intentChartRef.value)
+}
+
+const renderCharts = () => {
+  ensureCharts()
+  const names = toolCalls.value.map((item) => item.toolName)
+  const durations = toolCalls.value.map((item) => Number(item.durationMs || 0))
+  traceChart?.setOption({
+    tooltip: { trigger: 'axis' },
+    grid: { left: 36, right: 14, top: 18, bottom: 34 },
+    xAxis: { type: 'category', data: names.length ? names : ['等待调用'], axisLabel: { color: '#718096' } },
+    yAxis: { type: 'value', axisLabel: { color: '#718096' }, splitLine: { lineStyle: { color: '#eef2f6' } } },
+    series: [{
+      type: 'line',
+      smooth: true,
+      symbolSize: 7,
+      data: durations.length ? durations : [0],
+      areaStyle: { color: 'rgba(37, 99, 235, .12)' },
+      lineStyle: { color: '#2563eb', width: 3 },
+      itemStyle: { color: '#2563eb' }
+    }]
+  })
+
+  const successCount = toolCalls.value.filter((item) => item.success).length
+  const failedCount = Math.max(toolCalls.value.length - successCount, 0)
+  statusChart?.setOption({
+    tooltip: { trigger: 'item' },
+    series: [{
+      type: 'pie',
+      radius: ['50%', '72%'],
+      label: { color: '#475569' },
+      data: [
+        { name: '成功', value: successCount },
+        { name: '失败', value: failedCount }
+      ],
+      color: ['#10b981', '#ef4444']
+    }]
+  })
+
+  intentChart?.setOption({
+    tooltip: { trigger: 'item' },
+    series: [{
+      type: 'pie',
+      radius: ['0%', '72%'],
+      label: { color: '#475569' },
+      data: intentHistory.value.length ? intentHistory.value : [{ name: '待识别', value: 1 }],
+      color: ['#2563eb', '#14b8a6', '#f59e0b', '#8b5cf6', '#64748b']
+    }]
+  })
+}
+
+const resizeCharts = () => {
+  traceChart?.resize()
+  statusChart?.resize()
+  intentChart?.resize()
+}
+
 const resetChat = () => {
   messages.value = [
     {
@@ -146,6 +269,7 @@ const resetChat = () => {
   latestResult.value = null
   conversationId.value = ''
   localStorage.removeItem('shortlink_agent_conversation_id')
+  nextTick(renderCharts)
 }
 
 const sendPrompt = (content) => {
@@ -188,6 +312,7 @@ const sendMessage = async () => {
     messages.value.push({
       id: Date.now() + 1,
       role: 'assistant',
+      intent: data?.intent,
       content: data?.answer || '没有获取到有效回复'
     })
   } catch (error) {
@@ -201,6 +326,21 @@ const sendMessage = async () => {
     scrollToBottom()
   }
 }
+
+watch(latestResult, () => nextTick(renderCharts), { deep: true })
+watch(messages, () => nextTick(renderCharts), { deep: true })
+
+onMounted(() => {
+  nextTick(renderCharts)
+  window.addEventListener('resize', resizeCharts)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resizeCharts)
+  traceChart?.dispose()
+  statusChart?.dispose()
+  intentChart?.dispose()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -387,6 +527,62 @@ const sendMessage = async () => {
     font-size: 16px;
     font-weight: 650;
     word-break: break-word;
+  }
+}
+
+.agent-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+
+  div {
+    min-height: 58px;
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid #dde4ec;
+    border-radius: 8px;
+  }
+
+  span {
+    display: block;
+    color: #778396;
+    font-size: 12px;
+    margin-bottom: 7px;
+  }
+
+  strong {
+    display: block;
+    color: #172033;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+.trace-panel {
+  padding-bottom: 10px;
+}
+
+.chart-box {
+  width: 100%;
+  height: 180px;
+
+  &.small {
+    height: 150px;
+  }
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  > div {
+    min-width: 0;
+  }
+
+  h3 {
+    margin-bottom: 4px;
   }
 }
 
