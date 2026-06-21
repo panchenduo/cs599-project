@@ -2,62 +2,70 @@
 
 ## 改造定位
 
-原系统是企业级短链 SaaS 平台，具备用户、分组、短链创建、访问统计、回收站、网关、Redis 缓存、Kafka 异步统计等基础能力。本次选择“方向二：企业级应用软件的 Agent 改造”，目标是让运营人员通过自然语言完成短链运营工作，并让系统具备可观测、可配置、可降级的 Agent 调度能力。
+本项目选择“方向二：企业级应用软件的 Agent 改造”。原始系统是企业级短链 SaaS 平台，已经具备用户、分组、短链创建、批量创建、回收站、访问统计、Redis 缓存、Kafka 异步统计、网关鉴权和前端管理台等能力。本次改造不是重写短链系统，而是在原系统上增加智能短链运营助手，使运营人员可以通过自然语言完成创建、查询、分析和运营建议生成。
 
-## 改造前痛点
-
-- 短链创建依赖表单，用户需要理解分组、有效期、描述等字段。
-- 统计页面提供大量指标，但缺少面向运营决策的自动分析。
-- 分组查询、短链查询、创建、统计分析是割裂流程，无法被统一编排。
-- 原系统 API 能力较完整，但缺少将 API 组织成多步骤任务的智能层。
-- 智能助手早期版本更像规则 demo，缺少模型配置、链路追踪和生产级降级机制。
-
-## 改造后能力
-
-- 自然语言创建短链，自动解析 URL、有效期、分组和描述。
-- Agent 创建短链复用网页标题和 favicon 元数据链路，保证列表质量与普通表单创建一致。
-- 分组列表、短链列表和分组统计均可由 Agent 调用现有业务工具完成。
-- 新增模型候选配置、provider 配置、settings API 和前端模型调度面板。
-- 新增工具调用耗时、成功率、意图分布、链路追踪概览等可观测能力。
-- 统计保存改造为 Kafka 异步链路，提升跳转链路稳定性。
-
-## 架构图
+## 总体架构
 
 ```mermaid
 flowchart TD
     User["运营人员自然语言指令"] --> Vue["console-vue 智能助手"]
-    Vue --> AgentAPI["ShortLinkAgentController"]
+    Vue --> Gateway["Gateway 鉴权与路由"]
+    Gateway --> AgentAPI["ShortLinkAgentController"]
     AgentAPI --> AgentService["ShortLinkAgentService"]
-    AgentService --> Memory["AgentMemoryService"]
+
+    AgentService --> Memory["数据库 + Redis 会话记忆"]
+    Memory --> Summary["长期摘要"]
+    Memory --> Window["最近窗口"]
+
+    AgentService --> Rewrite["Query Rewrite / 指代消解"]
+    Rewrite --> FunctionCalling["真实 LLM Function Calling"]
+    FunctionCalling --> Tools["业务工具编排"]
+
     AgentService --> Router["AgentRoutingExecutor"]
-    Router --> ModelConfig["AgentModelProperties"]
-    Router --> Circuit["CircuitBreakerStore"]
-    AgentService --> Tools["业务工具编排"]
+    Router --> Breaker["三态熔断器 CLOSED/OPEN/HALF_OPEN"]
+    Router --> Fallback["safe-fallback"]
+
     Tools --> Group["GroupService.groupList"]
     Tools --> Create["ShortLinkService.createShortLink"]
-    Tools --> Title["UrlTitleService.getTitleByUrl"]
     Tools --> Page["ShortLinkService.pageShortLink"]
     Tools --> Stats["ShortLinkStatsService.groupShortLinkStats"]
-    Create --> DB["MySQL / ShardingSphere"]
+    Tools --> Title["UrlTitleService.getTitleByUrl"]
+
+    Create --> MySQL["MySQL / ShardingSphere"]
+    Page --> MySQL
+    Stats --> MySQL
     Create --> Redis["Redis Cache"]
-    Stats --> DB
-    AgentService --> Trace["Tool Trace DTO"]
+    Stats --> Kafka["Kafka / Redis Stream"]
+
+    AgentService --> Trace["Tool Trace / 模型状态 / 建议动作"]
     Trace --> Vue
 ```
 
-## 数据流
+## 核心数据流
 
-1. 用户在智能助手输入自然语言。
-2. 聚合服务读取会话记忆，按模型候选配置选择调度策略。
-3. Agent 识别意图并组装工具参数。
-4. 工具复用现有短链业务服务，不绕过权限、分组和白名单校验。
-5. 创建短链时先补齐标题元数据，再由核心服务补齐 favicon。
-6. 工具调用结果被压缩为 trace 返回前端，前端渲染耗时、状态和分布图表。
+1. 用户在智能助手中输入自然语言，例如“帮我给 https://www.zhihu.com 创建一个 7 天有效的短链”。
+2. Agent API 接收请求，读取 conversationId、用户信息、当前分组等上下文。
+3. 记忆层从数据库加载长期摘要，并从 Redis 加载最近窗口，用于恢复多轮对话上下文。
+4. Query Rewrite 模块进行术语归一化、指代消解和参数补全。
+5. 真实 LLM Function Calling 根据工具 schema 选择业务工具并生成结构化参数。
+6. 工具层复用原短链服务，不绕过权限校验、白名单校验、缓存预热和统计链路。
+7. 工具结果被压缩为 trace，前端展示意图、工具数量、成功率、平均耗时、模型状态和建议动作。
 
-## 关键工程设计
+## Agent 工具清单
 
-- 配置驱动模型调度：`short-link.agent.model` 定义 provider、候选模型、优先级、熔断参数和流式参数。
-- 熔断降级：候选策略失败后进入 OPEN/HALF_OPEN 状态，fallback 策略兜底。
-- Tool Calling 风格：每个工具都有 request、response 摘要、success、durationMs 和 message。
-- 元数据一致性：Agent 创建短链与普通表单创建共用标题、favicon 链路。
-- 可扩展性：后续可将规则意图识别替换为 OpenAI-compatible Function Calling 或 Spring AI。
+| 工具 | 复用能力 | 作用 |
+| --- | --- | --- |
+| `listGroups` | `GroupService.groupList` | 获取当前用户短链分组 |
+| `createShortLink` | `ShortLinkService.createShortLink` | 创建单个短链 |
+| `batchCreateShortLink` | `ShortLinkService.batchCreateShortLink` | 批量创建短链 |
+| `pageShortLink` | `ShortLinkService.pageShortLink` | 查询短链列表 |
+| `groupShortLinkStats` | `ShortLinkStatsService.groupShortLinkStats` | 生成分组访问统计分析 |
+| `getTitleByUrl` | `UrlTitleService.getTitleByUrl` | 获取网页标题，补全短链描述 |
+
+## 生产级增强
+
+- **真实 LLM Function Calling**：由模型根据工具 schema 完成意图识别、工具选择和参数抽取。
+- **数据库 + Redis 记忆**：数据库保存长期摘要，Redis 缓存最近窗口，兼顾持久化和加载速度。
+- **三态熔断器**：模型健康状态包括 CLOSED、OPEN、HALF_OPEN，主模型失败后自动降级到 fallback。
+- **工具可观测性**：每次工具调用记录 request、responseSummary、success、durationMs 和 message。
+- **原系统边界复用**：Agent 不直接写数据库，而是复用已有业务服务，保证安全性和一致性。
