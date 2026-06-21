@@ -216,9 +216,9 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
             networkStats.add(networkRespDTO);
         });
         return ShortLinkStatsRespDTO.builder()
-                .pv(pvUvUipStatsByShortLink.getPv())
-                .uv(pvUvUipStatsByShortLink.getUv())
-                .uip(pvUvUipStatsByShortLink.getUip())
+                .pv(nullSafe(pvUvUipStatsByShortLink == null ? null : pvUvUipStatsByShortLink.getPv()))
+                .uv(nullSafe(pvUvUipStatsByShortLink == null ? null : pvUvUipStatsByShortLink.getUv()))
+                .uip(nullSafe(pvUvUipStatsByShortLink == null ? null : pvUvUipStatsByShortLink.getUip()))
                 .daily(daily)
                 .localeCnStats(localeCnStats)
                 .hourStats(hourStats)
@@ -412,9 +412,9 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
             networkStats.add(networkRespDTO);
         });
         return ShortLinkStatsRespDTO.builder()
-                .pv(pvUvUidStatsByGroup.getPv())
-                .uv(pvUvUidStatsByGroup.getUv())
-                .uip(pvUvUidStatsByGroup.getUip())
+                .pv(nullSafe(pvUvUidStatsByGroup == null ? null : pvUvUidStatsByGroup.getPv()))
+                .uv(nullSafe(pvUvUidStatsByGroup == null ? null : pvUvUidStatsByGroup.getUv()))
+                .uip(nullSafe(pvUvUidStatsByGroup == null ? null : pvUvUidStatsByGroup.getUip()))
                 .daily(daily)
                 .localeCnStats(localeCnStats)
                 .hourStats(hourStats)
@@ -456,5 +456,9 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
             each.setUvType(uvType);
         });
         return actualResult;
+    }
+
+    private int nullSafe(Integer value) {
+        return Optional.ofNullable(value).orElse(0);
     }
 }

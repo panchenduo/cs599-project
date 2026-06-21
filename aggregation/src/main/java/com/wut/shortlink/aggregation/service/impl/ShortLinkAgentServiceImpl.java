@@ -257,7 +257,7 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
     private ShortLinkAgentChatRespDTO queryGroups(List<AgentToolCallRespDTO> toolCalls) {
         List<ShortLinkGroupRespDTO> groups = listGroups(toolCalls);
         String content = groups.stream()
-                .map(each -> "- " + each.getName() + "：" + each.getGid() + "，短链数 " + firstNotBlank(each.getShortLinkCount(), "0"))
+                .map(each -> "- " + each.getName() + "：" + each.getGid() + "，短链数 " + resolveGroupShortLinkCount(each, toolCalls))
                 .collect(Collectors.joining("\n"));
         if (!notBlank(content)) {
             content = "当前账户还没有短链分组。";
@@ -268,6 +268,23 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
                 .suggestions(List.of("查看默认分组短链列表", "分析某个分组最近 7 天访问数据"))
                 .toolCalls(toolCalls)
                 .build();
+    }
+
+    private String resolveGroupShortLinkCount(ShortLinkGroupRespDTO group, List<AgentToolCallRespDTO> toolCalls) {
+        String cachedCount = group.getShortLinkCount();
+        if (notBlank(cachedCount) && !"0".equals(cachedCount)) {
+            return cachedCount;
+        }
+        ShortLinkPageReqDTO pageReq = new ShortLinkPageReqDTO();
+        pageReq.setGid(group.getGid());
+        pageReq.setCurrent(1);
+        pageReq.setSize(1);
+        try {
+            IPage<ShortLinkPageRespDTO> pageResp = callTool("countGroupShortLinks", pageReq, () -> shortLinkService.pageShortLink(pageReq), toolCalls);
+            return String.valueOf(pageResp.getTotal());
+        } catch (RuntimeException ex) {
+            return firstNotBlank(cachedCount, "0");
+        }
     }
 
     private <T> T callTool(String toolName, Object request, Supplier<T> supplier, List<AgentToolCallRespDTO> toolCalls) {
@@ -524,7 +541,14 @@ public class ShortLinkAgentServiceImpl implements ShortLinkAgentService {
     }
 
     private String simplifyError(Throwable throwable) {
-        String message = throwable == null ? null : throwable.getMessage();
+        Throwable root = throwable;
+        while (root != null && root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+        }
+        String message = root == null ? null : root.getMessage();
+        if (!notBlank(message)) {
+            message = throwable == null ? null : throwable.getClass().getSimpleName();
+        }
         if (!notBlank(message)) {
             return "未知错误";
         }
